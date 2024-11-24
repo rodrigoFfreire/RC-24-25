@@ -5,12 +5,14 @@
 #include <memory>
 #include <sstream>
 #include <netdb.h>
+#include <csignal>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <arpa/inet.h>
 #include "../exceptions/ServerExceptions.hpp"
 #include "../../common/exceptions/SocketErrors.hpp"
 #include "../../common/constants.hpp"
+#include "../../common/protocol/Packet.hpp"
 #include <mutex>
 
 class UdpSocket {
@@ -32,6 +34,7 @@ public:
 
     void setup();
     int receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr);
+    void sendPacket(std::unique_ptr<Packet>& replyPacket, struct sockaddr_in& client_addr);
 
     const struct addrinfo* getSocketInfo() const;
 
