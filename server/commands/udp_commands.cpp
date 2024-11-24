@@ -87,13 +87,14 @@ void quitHandler(std::stringstream &packetStream, Server &state, std::unique_ptr
 
 void debugGameHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<Packet>& replyPacket) {
     DebugPacket request;
-    auto reply = std::make_unique<ReplyQuitPacket>();
-    reply->status = ReplyQuitPacket::ERR;
+    auto reply = std::make_unique<ReplyDebugPacket>();
+    reply->status = ReplyDebugPacket::ERR;
 
     try {
         request.decode(packetStream);
 
         // DBG
+        reply->status = ReplyDebugPacket::OK;
         std::stringstream ss;
         ss << "[Player " << request.playerID << "] > Debug game. Key:";
         for (int i = 0; i < SECRET_KEY_LEN; i++) {
@@ -101,7 +102,7 @@ void debugGameHandler(std::stringstream &packetStream, Server &state, std::uniqu
         }
         state.logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const InvalidPacketException& e) {
-        reply->status = ReplyQuitPacket::ERR;
+        reply->status = ReplyDebugPacket::ERR;
         state.logger.log(Logger::Severity::WARN, e.what(), true);
     }
 
