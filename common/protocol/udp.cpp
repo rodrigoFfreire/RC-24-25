@@ -130,6 +130,7 @@ void QuitPacket::decode(std::stringstream& packetStream) {
 
     parser.next();
     playerID = parser.parsePlayerID();
+    parser.end();
 };
 
 std::string QuitPacket::encode() const {
