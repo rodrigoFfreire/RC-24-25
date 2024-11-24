@@ -3,7 +3,7 @@
 
 #include <unordered_map>
 #include <functional>
-#include "Config.hpp"
+#include "utils/Config.hpp"
 #include "sockets/UdpSocket.hpp"
 #include "../common/Logger.hpp"
 #include "../common/protocol/Packet.hpp"

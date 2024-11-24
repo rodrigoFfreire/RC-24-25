@@ -4,8 +4,8 @@
 #include <iostream>
 #include <string>
 #include <unistd.h>
-#include "../common/constants.hpp"
-#include "../common/exceptions/ConfigExceptions.hpp"
+#include "../../common/constants.hpp"
+#include "../../common/exceptions/ConfigExceptions.hpp"
 
 class Config {
 public:

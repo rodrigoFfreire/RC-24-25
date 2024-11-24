@@ -2,7 +2,7 @@
 #define SERVER_SIGNALS_HPP
 
 #include <csignal>
-#include "../common/exceptions/SignalHandlerErrors.hpp"
+#include "../../common/exceptions/SignalHandlerErrors.hpp"
 
 extern volatile sig_atomic_t terminate_flag;
 

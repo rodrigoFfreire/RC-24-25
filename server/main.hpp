@@ -2,6 +2,6 @@
 #define SERVER_MAIN_HPP
 
 #include "Server.hpp"
-#include "signals.hpp"
+#include "utils/signals.hpp"
 
 #endif
