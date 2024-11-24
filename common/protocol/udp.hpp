@@ -4,96 +4,157 @@
 #include "Packet.hpp"
 
 class StartNewGamePacket : public Packet {
-private:
-    static constexpr const char* packetID = "SNG";
-    u_int16_t time;
-    u_int32_t playerID;
-
 public:
-    void decode(std::stringstream& packetStream);
-    std::string encode() const;
+    static constexpr const char* packetID = "SNG";
+    unsigned int time;
+    unsigned int playerID;
+
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class ReplyStartGamePacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "RSG";
     enum Status { OK, NOK, ERR };
     Status status;
 
-public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    std::string statusToStr(Status status) const {
+        switch (status) {
+        case OK:
+            return "OK";
+        case NOK:
+            return "NOK";
+        case ERR:
+            return "ERR";
+        default:
+            throw PacketEncodingException();
+        }
+    };
+
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class TryPacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "TRY";
-    u_int32_t playerID;
-    u_int32_t trial;
+    unsigned int playerID;
+    unsigned int trial;
     char key[SECRET_KEY_LEN];
 
-public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class ReplyTryPacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "RTR";
     enum Status { OK, DUP, INV, NOK, ENT, ETM, ERR };
-    u_int32_t trial;
-    u_int8_t whites;
-    u_int8_t blacks;
+    Status status;
+    unsigned int trial;
+    unsigned int whites;
+    unsigned int blacks;
     char key[SECRET_KEY_LEN];
 
-public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    std::string statusToStr(Status status) const {
+        switch (status) {
+        case OK:
+            return "OK";
+        case DUP:
+            return "DUP";
+        case INV:
+            return "INV";
+        case NOK:
+            return "NOK";
+        case ENT:
+            return "ENT";
+        case ETM:
+            return "ETM";
+        case ERR:
+            return "ERR";
+        default:
+            throw PacketEncodingException();
+        }
+    };
+
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class QuitPacket : public Packet {
-private:
-    static constexpr const char* packetID = "QUT";
-    u_int32_t playerID;
-
 public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    static constexpr const char* packetID = "QUT";
+    unsigned int playerID;
+
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class ReplyQuitPacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "RQT";
     enum Status { OK, NOK, ERR };
     Status status;
     char key[SECRET_KEY_LEN];
 
-public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    std::string statusToStr(Status status) const {
+        switch (status) {
+        case OK:
+            return "OK";
+        case NOK:
+            return "NOK";
+        case ERR:
+            return "ERR";
+        default:
+            throw PacketEncodingException();
+        }
+    };
+
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class DebugPacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "DBG";
-    u_int32_t playerID;
-    u_int16_t time;
+    unsigned int playerID;
+    unsigned int time;
     char key[SECRET_KEY_LEN];
 
-public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
 };
 
 class ReplyDebugPacket : public Packet {
-private:
+public:
     static constexpr const char* packetID = "RBD";
     enum Status { OK, NOK, ERR };
     Status status;
 
+    std::string statusToStr(Status status) const {
+        switch (status) {
+        case OK:
+            return "OK";
+        case NOK:
+            return "NOK";
+        case ERR:
+            return "ERR";
+        default:
+            throw PacketEncodingException();
+        }
+    };
+    
+    void decode(std::stringstream& packetStream) override;
+    std::string encode() const override;
+};
+
+class ErrorPacket : public Packet {
 public:
-    void decode(std::stringstream& packetStream);
-    void encode(const std::stringstream& packetStream) const;
+    static constexpr const char* packetID = "ERR";
+
+    void decode(std::stringstream& packetStream) override {(void)packetStream;};
+    std::string encode() const override {return "ERR\n";};
 };
 
 #endif

@@ -3,12 +3,13 @@
 
 #include <sstream>
 #include <string>
-#include <cctype>
+#include <cstdint>
 #include "../constants.hpp"
 #include "../exceptions/ProtocolExceptions.hpp"
 
 class Packet {
 public:
+    virtual ~Packet() = default;
     virtual void decode(std::stringstream& packetStream) = 0;
     virtual std::string encode() const = 0;
 };
@@ -19,7 +20,7 @@ private:
 
     std::string parseFixedString(size_t size);
     std::string parseFixedDigitString(size_t size);
-    int parseInt();
+    char parseColorChar();
     void checkNextChar(const char c);
 
 public:
@@ -28,8 +29,11 @@ public:
     void next();
     void end();
     std::string parsePacketID();
-    u_int32_t parsePlayerID();
-    u_int16_t parsePlayTime();
+    std::string parseStatus();
+    unsigned int parsePlayerID();
+    unsigned int parseUInt();
+    char parseChar();
+    void parseKey(char *key);
 };
 
 #endif

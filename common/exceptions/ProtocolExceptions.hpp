@@ -19,4 +19,12 @@ public:
     UnexpectedPacketException() : CommonException(errorMsg) {};
 };
 
+class PacketEncodingException : public CommonException {
+private:
+    const std::string errorMsg = "Cannot encode invalid packet data";
+
+public:
+    PacketEncodingException() : CommonException(errorMsg) {};
+};
+
 #endif

@@ -64,12 +64,11 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
     socklen_t client_addrlen = sizeof(client_addr);
 
     received_bytes = recvfrom(socket_fd,
-                                        buffer,
-                                        sizeof(buffer),
-                                        0,
-                                        reinterpret_cast<struct sockaddr*>(&client_addr),
-                                        &client_addrlen
-                                    );
+                                buffer,
+                                sizeof(buffer),
+                                0,
+                                reinterpret_cast<struct sockaddr*>(&client_addr),
+                                &client_addrlen);
     if (received_bytes == -1) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return TIMEOUT;
@@ -82,6 +81,20 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
 
     packetStream.write(buffer, received_bytes);
     return OK;
+}
+
+void UdpSocket::sendPacket(std::unique_ptr<Packet>& replyPacket, struct sockaddr_in& client_addr) {
+    socklen_t client_addrlen = sizeof(client_addr);
+    std::string packetStr = replyPacket->encode();
+    const char* buffer = packetStr.c_str();
+    if (sendto(socket_fd,
+                buffer,
+                packetStr.size(),
+                0,
+                reinterpret_cast<struct sockaddr*>(&client_addr),
+                client_addrlen) == -1) {
+        throw ServerSendError();
+    }
 }
 
 const addrinfo *UdpSocket::getSocketInfo() const {
