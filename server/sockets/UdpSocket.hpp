@@ -13,7 +13,6 @@
 #include "../../common/exceptions/SocketErrors.hpp"
 #include "../../common/constants.hpp"
 #include "../../common/protocol/Packet.hpp"
-#include <mutex>
 
 class UdpSocket {
 private:
@@ -37,8 +36,6 @@ public:
     void sendPacket(std::unique_ptr<Packet>& replyPacket, struct sockaddr_in& client_addr);
 
     const struct addrinfo* getSocketInfo() const;
-
-    
 };
 
 #endif

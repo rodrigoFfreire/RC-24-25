@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
         register_signal_handler();
 
         Server server(config, logger);
-        server.runUdp();
+        server.runTcp();
     } catch (const std::exception& e) {
         logger.log(Logger::Severity::ERROR, e.what(), true);
         return EXIT_FAILURE;

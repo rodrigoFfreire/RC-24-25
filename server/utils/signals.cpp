@@ -1,6 +1,6 @@
 #include "signals.hpp"
 
-volatile sig_atomic_t terminate_flag = 0;
+volatile std::sig_atomic_t terminate_flag = 0;
 
 void sig_handler(int signal) {
   (void)signal;

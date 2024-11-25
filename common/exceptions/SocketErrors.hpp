@@ -36,21 +36,20 @@ public:
     SocketBindError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
-class SocketListenFailedError : public CommonError {
+class SocketListenError : public CommonError {
 private:
     static constexpr const char* errorMsg = "Failed to start listening on socket! ";
 
 public:
-    SocketListenFailedError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+    SocketListenError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
-class SocketSetOptFailedError : public CommonError {
+class SocketSetOptError : public CommonError {
 private:
     static constexpr const char* errorMsg = "Failed to set socket options! ";
 
 public:
-    SocketSetOptFailedError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+    SocketSetOptError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
-
 
 #endif

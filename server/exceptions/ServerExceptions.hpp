@@ -19,4 +19,13 @@ public:
     ServerSendError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
+class AcceptTCPConnectionError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to accept TCP connection! ";
+
+public:
+    AcceptTCPConnectionError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+
 #endif

@@ -1,6 +1,6 @@
 #include "UdpSocket.hpp"
 
-extern volatile sig_atomic_t terminate_flag;
+extern volatile std::sig_atomic_t terminate_flag;
 
 void UdpSocket::createSocket() {
     if (socket_fd != -1) {
@@ -12,14 +12,6 @@ void UdpSocket::createSocket() {
                                 socket_addr->ai_socktype,
                                 socket_addr->ai_protocol)) == -1) {
         throw SocketOpenError();
-    }
-
-    // Set read timeout at socket level
-    timeval tv;
-    tv.tv_sec = SERVER_RECV_TIMEOUT;
-    tv.tv_usec = 0;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) == -1) {
-        throw SocketSetOptFailedError();
     }
 
     // Bind socket
