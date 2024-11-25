@@ -27,5 +27,28 @@ public:
     AcceptTCPConnectionError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
+class PeerNameResolveError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to get peer's information! ";
+
+public:
+    PeerNameResolveError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class ConnectionTimeoutError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "TCP Connection with client timed out! ";
+
+public:
+    ConnectionTimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class ClientResetError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "TCP Connection reset by client! ";
+
+public:
+    ClientResetError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
 
 #endif

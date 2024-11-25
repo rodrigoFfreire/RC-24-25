@@ -24,9 +24,9 @@ std::string Logger::severityToStr(Severity level) {
 }
 
 void Logger::log(Severity level, const std::string& msg, bool newLine) {
-    std::string log_msg = format(level, msg);
-
     std::lock_guard<std::mutex> lock(logMutex);
+
+    std::string log_msg = format(level, msg);
     switch (level) {
         case Severity::INFO:
         case Severity::WARN:

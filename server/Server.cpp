@@ -3,33 +3,44 @@
 #include "../common/constants.hpp"
 #include "../common/protocol/udp.hpp"
 #include "commands/udp_commands.hpp"
+#include "../common/utils.hpp"
 
 extern volatile std::sig_atomic_t terminate_flag;
 
 Server::Server(Config& config, Logger& logger) 
-    : port(config.port), udpSocket(port), tcpSocket(port), tcpPool(TCP_MAXCLIENTS), logger(logger) {
+    : port(config.port), udpSocket(port), tcpSocket(port), logger(logger) {
     registerCommands();
-    setupSockets();
 };
 
-void Server::setupSockets() {
+void Server::setupUdp() {
     char ipstr[INET_ADDRSTRLEN];
     std::ostringstream log_msg;
     
     udpSocket.setup();
-    tcpSocket.setup();
 
     const addrinfo* info = udpSocket.getSocketInfo();
     struct sockaddr_in *udp_addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
     inet_ntop(info->ai_family, &udp_addr->sin_addr, ipstr, sizeof(ipstr));
-    log_msg << "Udp socket binded to " << ipstr << ":" << this->port << " | ";
+    log_msg << "Udp socket binded to " << ipstr << ":" << port;
 
-    info = tcpSocket.getSocketInfo();
+    logger.log(Logger::Severity::INFO, log_msg.str(), true);
+
+}
+
+void Server::setupTcp() {
+    char ipstr[INET_ADDRSTRLEN];
+    std::ostringstream log_msg;
+    
+    tcpSocket.setup();
+    tcpPool.dispatch(TCP_MAXCLIENTS);
+
+    const addrinfo* info = tcpSocket.getSocketInfo();
     struct sockaddr_in *tcp_addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
     inet_ntop(info->ai_family, &tcp_addr->sin_addr, ipstr, sizeof(ipstr));
-    log_msg << "Tcp socket binded and listening at " << ipstr << ":" << port << std::endl;
+    log_msg << "TCP socket binded and listening at " << ipstr << ":" << port;
+    
+    logger.log(Logger::Severity::INFO, log_msg.str(), true);
 
-    logger.log(Logger::Severity::INFO, log_msg.str());
 }
 
 void Server::registerCommands() {
@@ -52,6 +63,7 @@ void Server::handleUdpCommand(std::string& packetId, std::stringstream& packetSt
 }
 
 void Server::runUdp() {
+    setupUdp();
     while (!terminate_flag) {
         struct sockaddr_in client_addr;
         try {
@@ -74,8 +86,9 @@ void Server::runUdp() {
             // Log client request
             std::ostringstream log_msg;
             std::string packetStr = packetStream.str();
-            log_msg << "[" << client_addrstr << ":" << ntohs(client_addr.sin_port) << "] > " << '\"' << packetStr << '\"' << std::endl;
-            logger.logVerbose(Logger::Severity::INFO, log_msg.str(), (packetStr.back() == '\n' ? false : true));
+            log_msg << "(UDP) " << "[" << client_addrstr << ":" << ntohs(client_addr.sin_port) << "] > ";
+            log_msg << '\"' << packetStr << '\"';
+            logger.logVerbose(Logger::Severity::INFO, log_msg.str(), true);
 
             // Get packet ID
             PacketParser parser(packetStream);
@@ -107,34 +120,74 @@ void Server::runUdp() {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }
     }
+    logger.log(Logger::Severity::INFO, "UDP monitor terminated!", true);
 }
 
 void Server::runTcp() {
+    setupTcp();
     while (!terminate_flag) {
         struct sockaddr_in client_addr;
         int conn_fd = -1;
+
         try {
             int err = tcpSocket.acceptConnection(conn_fd, client_addr);
-            if (err == TcpSocket::TERMINATE)
+            if (err == TcpSocket::TIMEOUT)
                 continue;
             else if (err == TcpSocket::TERMINATE)
                 break;
 
-            std::string a("Incoming request! fd=", conn_fd);
-            logger.log(Logger::Severity::INFO, a, true);
+            // Get client address and port
+            const addrinfo* info = tcpSocket.getSocketInfo();
+            char client_addrstr[INET_ADDRSTRLEN];
+            inet_ntop(info->ai_family, &client_addr.sin_addr, client_addrstr, sizeof(client_addrstr));
+
+            // Log connection request
+            std::ostringstream log_msg;
+            log_msg << "(TCP) " << "[" << client_addrstr << ":" << ntohs(client_addr.sin_port) << "] > " << "Connected";
+            logger.logVerbose(Logger::Severity::INFO, log_msg.str(), true);
+
+            // Handle connection with worker thread
+            tcpSocket.setupConnection(conn_fd);
             tcpPool.enqueueConnection([this, conn_fd] {
                 handleTcpConnection(conn_fd);
             });
-        } catch (...) {
-            // handle errors
+        } catch (const CommonError& e) {
+            logger.log(Logger::Severity::ERROR, e.what(), true);
         }
     }
+    logger.log(Logger::Severity::INFO, "TCP monitor terminated! Closing worker threads...", true);
 }
 
-void Server::handleTcpConnection(const int conn_fd) {
-    usleep(3000000);
-    std::string m("TCP connection established on fd=" + conn_fd + '\n');
-    write(conn_fd, m.c_str(), m.size());
-    logger.log(Logger::Severity::INFO, m, true);
+void Server::handleTcpConnection(int conn_fd) {
+    char buffer[PACKET_ID_LEN + 1];
+    try {
+        ssize_t read = safe_read(conn_fd, buffer, PACKET_ID_LEN);
+        if (read == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                throw ConnectionTimeoutError();
+            } else if (errno == ECONNRESET) {
+                throw ClientResetError();
+            }
+            throw ServerReceiveError();
+        } else if (!read) {
+            throw ClientResetError();
+        }
+
+        usleep(10000000);
+
+        ssize_t write = safe_write(conn_fd, buffer, (size_t)read);
+        if (write == -1) {
+            if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                throw ConnectionTimeoutError();
+            }
+            throw ServerSendError();
+        }
+    } catch (const CommonError& e) {
+        logger.log(Logger::Severity::ERROR, e.what(), true);
+    } catch (const std::exception& e) {
+        logger.log(Logger::Severity::ERROR, e.what(), true);
+    }
+
     close(conn_fd);
+    return;
 }

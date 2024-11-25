@@ -23,7 +23,8 @@ private:
     //std::unordered_map<std::string, HandlerFunc> tcp_handlers;
     WorkerPool tcpPool;
 
-    void setupSockets();
+    void setupUdp();
+    void setupTcp();
     void registerCommands();
     void handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<Packet>& replyPacket);
 
