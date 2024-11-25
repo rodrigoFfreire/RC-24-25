@@ -14,6 +14,20 @@ void UdpSocket::createSocket() {
         throw SocketOpenError();
     }
 
+    // Set reusable address to avoid "already in use" errors
+    int yes = 1;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
+        throw SocketSetOptError();
+    }
+
+    // Set listening timeout at socket level
+    struct timeval tv;
+    tv.tv_sec = SERVER_RECV_TIMEOUT;
+    tv.tv_usec = 0;
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) == -1) {
+        throw SocketSetOptError();
+    }
+
     // Bind socket
     if (bind(socket_fd, socket_addr->ai_addr, socket_addr->ai_addrlen) == -1) {
         throw SocketBindError();

@@ -33,7 +33,8 @@ public:
 
     void setup();
     int acceptConnection(int& conn_fd, struct sockaddr_in& client_addr);
-    const struct addrinfo* getSocketInfo() const;
+    void setupConnection(const int& conn_fd);
+    const addrinfo* getSocketInfo() const;
 };
 
 #endif
