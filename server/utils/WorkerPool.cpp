@@ -20,15 +20,13 @@ void WorkerPool::workerThread() {
     }
 }
 
-WorkerPool::WorkerPool(size_t num_workers)
-    : isStopping(false) {
+void WorkerPool::dispatch(size_t num_workers) {
     for (size_t i = 0; i < num_workers; ++i) {
         workers.emplace_back(&WorkerPool::workerThread, this);
     }
 }
 
-WorkerPool::~WorkerPool()
-{
+WorkerPool::~WorkerPool() {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         isStopping = true;

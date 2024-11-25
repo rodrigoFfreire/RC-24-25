@@ -16,7 +16,7 @@ void register_signal_handler() {
   if (sigaction(SIGINT, &sa, NULL) == -1) {
     throw SIGINTRegisterError();
   }
-  if (sigaction(SIGTERM, &sa, NULL) == -1) {
+  if (sigaction(SIGUSR1, &sa, NULL) == -1) {
     throw SIGTERMRegisterError();
   }
 }

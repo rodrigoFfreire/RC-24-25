@@ -15,14 +15,13 @@ private:
     std::queue<std::function<void()>> connectionQueue;
     std::mutex queueMutex;
     std::condition_variable alertCond;
-    bool isStopping;
+    bool isStopping = false;
 
     void workerThread();
 
 public:
-    WorkerPool(size_t num_workers);
+    void dispatch(size_t num_workers);
     ~WorkerPool();
-
     void enqueueConnection(std::function<void()> connHandler);
 };
 
