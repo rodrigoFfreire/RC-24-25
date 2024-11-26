@@ -16,9 +16,8 @@ int main(int argc, char **argv) {
         std::thread udpThread(&Server::runUdp, &server);
         std::thread tcpThread(&Server::runTcp, &server);
 
-        if (udpThread.joinable()) {
-            udpThread.join();
-        }
+        udpThread.join();
+        tcpThread.join();
     } catch (const std::exception& e) {
         logger.log(Logger::Severity::ERROR, e.what(), true);
         return EXIT_FAILURE;

@@ -76,11 +76,10 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
                                 reinterpret_cast<struct sockaddr*>(&client_addr),
                                 &client_addrlen);
     if (received_bytes == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            return TIMEOUT;
-        }
-        else if (terminate_flag) {
+        if (terminate_flag) {
             return TERMINATE;
+        } else if(errno == EAGAIN || errno == EWOULDBLOCK) {
+            return TIMEOUT;
         }
         throw ServerReceiveError();
     }
