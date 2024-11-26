@@ -1,11 +1,6 @@
 #include "Packet.hpp"
 #include <vector>
 
-PacketParser::PacketParser(std::stringstream& stream)
-    : packetStream(stream) {
-    packetStream >> std::noskipws;  // Make stream not ignore whitespace
-}
-
 std::string PacketParser::parseFixedString(size_t size) {
     std::vector<char> buffer(size + 1);
     buffer[size] = '\0';
@@ -74,12 +69,7 @@ void PacketParser::end() {
 }
 
 std::string PacketParser::parsePacketID() {
-    std::string ID = parseFixedString(PACKET_ID_LEN);
-    char c = packetStream.peek();
-    if (c == -1) {
-        throw InvalidPacketException();
-    }
-    return ID;
+    return parseFixedString(PACKET_ID_LEN);
 }
 
 std::string PacketParser::parseStatus() {

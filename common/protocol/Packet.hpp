@@ -24,7 +24,7 @@ private:
     void checkNextChar(const char c);
 
 public:
-    PacketParser(std::stringstream& stream);
+    PacketParser(std::stringstream& stream) : packetStream(stream) {};
 
     void next();
     void end();
