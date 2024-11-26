@@ -2,7 +2,9 @@
 
 #include "../common/constants.hpp"
 #include "../common/protocol/udp.hpp"
+#include "../common/protocol/tcp.hpp"
 #include "commands/udp_commands.hpp"
+#include "commands/tcp_commands.hpp"
 #include "../common/utils.hpp"
 
 extern volatile std::sig_atomic_t terminate_flag;
@@ -51,6 +53,8 @@ void Server::registerCommands() {
     udp_handlers.insert({DebugPacket::packetID, debugGameHandler});
 
     // Tcp commands
+    tcp_handlers.insert({ShowTrialsPacket::packetID, showTrialsHandler});
+    tcp_handlers.insert({ShowScoreboardPacket::packetID, showScoreboardHandler});
 }
 
 void Server::handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<Packet>& replyPacket) {
@@ -60,6 +64,15 @@ void Server::handleUdpCommand(std::string& packetId, std::stringstream& packetSt
     }
 
     it->second(packetStream, *this, replyPacket);
+}
+
+void Server::handleTcpCommand(std::string &packetId, const int& conn_fd, std::unique_ptr<Packet> &replyPacket) {
+    auto it = tcp_handlers.find(packetId);
+    if (it == tcp_handlers.end()) {
+        throw UnexpectedPacketException();
+    }
+
+    it->second(conn_fd, *this, replyPacket);
 }
 
 void Server::runUdp() {
@@ -159,7 +172,11 @@ void Server::runTcp() {
 }
 
 void Server::handleTcpConnection(int conn_fd) {
-    char buffer[PACKET_ID_LEN + 1];
+    char buffer[PACKET_ID_LEN + 1] = {0};
+    std::unique_ptr<Packet> replyPacket = nullptr;
+    std::stringstream packetStream;
+    packetStream >> std::noskipws;
+
     try {
         ssize_t read = safe_read(conn_fd, buffer, PACKET_ID_LEN);
         if (read == -1) {
@@ -173,17 +190,33 @@ void Server::handleTcpConnection(int conn_fd) {
             throw ClientResetError();
         }
 
-        usleep(10000000);
+        // Get packet ID
+        packetStream << buffer;
+        PacketParser parser(packetStream);
+        std::string packetID = parser.parsePacketID();
 
-        ssize_t write = safe_write(conn_fd, buffer, (size_t)read);
-        if (write == -1) {
-            if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                throw ConnectionTimeoutError();
-            }
-            throw ServerSendError();
+        // Handle command
+        handleTcpCommand(packetID, conn_fd, replyPacket);
+
+        // Send reply
+        if (replyPacket != nullptr)
+            tcpSocket.sendPacket(conn_fd, replyPacket);
+    } catch (const CommonException& e) {
+        logger.log(Logger::Severity::WARN, e.what(), true);
+        try {
+            std::unique_ptr<Packet> errPacket = std::make_unique<ErrorPacket>();
+            tcpSocket.sendPacket(conn_fd, errPacket);
+        } catch (const ServerSendError& e) {
+            logger.log(Logger::Severity::ERROR, e.what(), true);
         }
-    } catch (const CommonError& e) {
-        logger.log(Logger::Severity::ERROR, e.what(), true);
+    }catch (const CommonError& e) {
+        logger.log(Logger::Severity::WARN, e.what(), true);
+        try {
+            std::unique_ptr<Packet> errPacket = std::make_unique<ErrorPacket>();
+            tcpSocket.sendPacket(conn_fd, errPacket);
+        } catch (const ServerSendError& e) {
+            logger.log(Logger::Severity::ERROR, e.what(), true);
+        }
     } catch (const std::exception& e) {
         logger.log(Logger::Severity::ERROR, e.what(), true);
     }

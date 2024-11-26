@@ -13,20 +13,22 @@
 class Server;
 
 class Server {
-    typedef void (*HandlerFunc)(std::stringstream&, Server&, std::unique_ptr<Packet>&);
+    typedef void (*HandlerUdpFunc)(std::stringstream&, Server&, std::unique_ptr<Packet>&);
+    typedef void (*HandlerTcpFunc)(const int&, Server&, std::unique_ptr<Packet>&);
 
 private:
     std::string port;    
     UdpSocket udpSocket;
     TcpSocket tcpSocket;
-    std::unordered_map<std::string, HandlerFunc> udp_handlers;
-    //std::unordered_map<std::string, HandlerFunc> tcp_handlers;
+    std::unordered_map<std::string, HandlerUdpFunc> udp_handlers;
+    std::unordered_map<std::string, HandlerTcpFunc> tcp_handlers;
     WorkerPool tcpPool;
 
     void setupUdp();
     void setupTcp();
     void registerCommands();
     void handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<Packet>& replyPacket);
+    void handleTcpCommand(std::string& packetId, const int& conn_fd, std::unique_ptr<Packet>& replyPacket);
 
 public:
     Logger& logger;
