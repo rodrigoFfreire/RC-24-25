@@ -1,8 +1,8 @@
 #ifndef COMMON_CONSTANTS_HPP
 #define COMMON_CONSTANTS_HPP
 
-#define DEFAULT_IPADRR          "localhost"
-#define DEFAULT_PORT            "58000"
+#define DEFAULT_IPADRR          "127.0.0.1"
+#define DEFAULT_PORT            "58065"
 
 #define LOGGER_LEVEL_INFO       "INFO"
 #define LOGGER_LEVEL_WARNING    "WARN"
@@ -12,11 +12,11 @@
 #define VALID_COLORS            "RGBYOP"
 
 #define SOCK_BUFFER_SIZE        128
-#define SERVER_RECV_TIMEOUT     3
+#define SERVER_RECV_TIMEOUT     10
 #define TCP_BACKLOG             5
 #define TCP_MAXCLIENTS          10
-#define TCP_CONN_RECV_TIMEOUT   3
-#define TCP_CONN_SEND_TIMEOUT   3
+#define TCP_CONN_RECV_TIMEOUT   10
+#define TCP_CONN_SEND_TIMEOUT   10
 
 #define SECRET_KEY_LEN          4
 #define PACKET_ID_LEN           3
