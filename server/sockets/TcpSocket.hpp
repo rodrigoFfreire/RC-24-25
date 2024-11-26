@@ -13,6 +13,7 @@
 #include "../../common/exceptions/SocketErrors.hpp"
 #include "../../common/constants.hpp"
 #include "../../common/protocol/Packet.hpp"
+#include "../../common/utils.hpp"
 
 class TcpSocket {
 private:
@@ -34,6 +35,7 @@ public:
     void setup();
     int acceptConnection(int& conn_fd, struct sockaddr_in& client_addr);
     void setupConnection(const int& conn_fd);
+    void sendPacket(const int& conn_fd, std::unique_ptr<Packet>& replyPacket);
     const addrinfo* getSocketInfo() const;
 };
 

@@ -16,7 +16,7 @@ void TcpSocket::createSocket() {
 
     // Set reusable address and port to avoid "already in use" errors and allow multiple tcp threads
     int yes = 1;
-    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &yes, sizeof(int)) == -1) {
+    if (setsockopt(socket_fd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
         throw SocketSetOptError();
     }
 
@@ -98,6 +98,19 @@ void TcpSocket::setupConnection(const int &conn_fd) {
     tv.tv_sec = TCP_CONN_SEND_TIMEOUT;
     if (setsockopt(conn_fd, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) == -1) {
         throw SocketSetOptError();
+    }
+}
+
+void TcpSocket::sendPacket(const int &conn_fd, std::unique_ptr<Packet> &replyPacket) {
+    std::string packetStr = replyPacket->encode();
+    const char *buffer = packetStr.c_str();
+
+    ssize_t written_bytes = safe_write(conn_fd, buffer, packetStr.size());
+    if (written_bytes == -1) {
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            throw ConnectionTimeoutError();
+        }
+        throw ServerSendError();
     }
 }
 
