@@ -12,7 +12,7 @@
 #define VALID_COLORS            "RGBYOP"
 
 #define SOCK_BUFFER_SIZE        128
-#define SERVER_RECV_TIMEOUT     10
+#define SERVER_RECV_TIMEOUT     3
 #define TCP_BACKLOG             5
 #define TCP_MAXCLIENTS          10
 #define TCP_CONN_RECV_TIMEOUT   10
