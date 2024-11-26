@@ -8,7 +8,7 @@ public:
     static constexpr const char* packetID = "STR";
     uint32_t playerID;
 
-    void decode(std::stringstream& packetStream);
+    void decode(std::stringstream& packetStream) override {};
     std::string encode() const override {return "";};
 };
 
@@ -22,7 +22,7 @@ public:
     uint32_t fsize;
 
     void decode(std::stringstream& packetStream) override {};
-    std::string encode() const override {return "";};
+    std::string encode() const override {return "OK!";};
 };
 
 class ShowScoreboardPacket : public Packet {
@@ -43,7 +43,7 @@ public:
     uint32_t fsize;
     
     void decode(std::stringstream& packetStream) override {};
-    std::string encode() const override {return "";};
+    std::string encode() const override {return "OK!";};
 };
 
 #endif
