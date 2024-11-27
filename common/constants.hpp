@@ -11,12 +11,12 @@
 #define TIMESTAMP_FORMAT        "%Y-%m-%d %H:%M:%S"
 #define VALID_COLORS            "RGBYOP"
 
-#define SOCK_BUFFER_SIZE        128
-#define SERVER_RECV_TIMEOUT     3
+#define SOCK_BUFFER_SIZE        32
+#define SERVER_RECV_TIMEOUT     5
 #define TCP_BACKLOG             5
-#define TCP_MAXCLIENTS          10
-#define TCP_CONN_RECV_TIMEOUT   10
-#define TCP_CONN_SEND_TIMEOUT   10
+#define TCP_MAXCLIENTS          5
+#define TCP_CONN_RECV_TIMEOUT   5
+#define TCP_CONN_SEND_TIMEOUT   5
 
 #define SECRET_KEY_LEN          4
 #define PACKET_ID_LEN           3
