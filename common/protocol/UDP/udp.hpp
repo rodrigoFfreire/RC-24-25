@@ -1,9 +1,15 @@
 #ifndef COMMON_PROTOCOL_UDP_PACKETS_HPP
 #define COMMON_PROTOCOL_UDP_PACKETS_HPP
 
-#include "Packet.hpp"
+#include "Parser.hpp"
 
-class StartNewGamePacket : public Packet {
+class UdpPacket {
+public:
+    virtual void decode(std::stringstream& packetStream) = 0;
+    virtual std::string encode() const = 0;
+};
+
+class StartNewGamePacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "SNG";
     unsigned int time;
@@ -13,7 +19,7 @@ public:
     std::string encode() const override;
 };
 
-class ReplyStartGamePacket : public Packet {
+class ReplyStartGamePacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "RSG";
     enum Status { OK, NOK, ERR };
@@ -36,7 +42,7 @@ public:
     std::string encode() const override;
 };
 
-class TryPacket : public Packet {
+class TryPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "TRY";
     unsigned int playerID;
@@ -47,7 +53,7 @@ public:
     std::string encode() const override;
 };
 
-class ReplyTryPacket : public Packet {
+class ReplyTryPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "RTR";
     enum Status { OK, DUP, INV, NOK, ENT, ETM, ERR };
@@ -82,7 +88,7 @@ public:
     std::string encode() const override;
 };
 
-class QuitPacket : public Packet {
+class QuitPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "QUT";
     unsigned int playerID;
@@ -91,7 +97,7 @@ public:
     std::string encode() const override;
 };
 
-class ReplyQuitPacket : public Packet {
+class ReplyQuitPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "RQT";
     enum Status { OK, NOK, ERR };
@@ -115,7 +121,7 @@ public:
     std::string encode() const override;
 };
 
-class DebugPacket : public Packet {
+class DebugPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "DBG";
     unsigned int playerID;
@@ -126,7 +132,7 @@ public:
     std::string encode() const override;
 };
 
-class ReplyDebugPacket : public Packet {
+class ReplyDebugPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "RBD";
     enum Status { OK, NOK, ERR };
@@ -149,7 +155,7 @@ public:
     std::string encode() const override;
 };
 
-class ErrorPacket : public Packet {
+class UdpErrorPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "ERR";
 

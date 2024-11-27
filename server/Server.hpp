@@ -4,17 +4,16 @@
 #include <unordered_map>
 #include <functional>
 #include "utils/Config.hpp"
+#include "utils/WorkerPool.hpp"
 #include "sockets/UdpSocket.hpp"
 #include "sockets/TcpSocket.hpp"
 #include "../common/Logger.hpp"
-#include "../common/protocol/Packet.hpp"
-#include "utils/WorkerPool.hpp"
 
 class Server;
 
 class Server {
-    typedef void (*HandlerUdpFunc)(std::stringstream&, Server&, std::unique_ptr<Packet>&);
-    typedef void (*HandlerTcpFunc)(const int&, Server&, std::unique_ptr<Packet>&);
+    typedef void (*HandlerUdpFunc)(std::stringstream&, Server&, std::unique_ptr<UdpPacket>&);
+    typedef void (*HandlerTcpFunc)(const int&, Server&, std::unique_ptr<TcpPacket>&);
 
 private:
     std::string port;    
@@ -27,8 +26,8 @@ private:
     void setupUdp();
     void setupTcp();
     void registerCommands();
-    void handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<Packet>& replyPacket);
-    void handleTcpCommand(std::string& packetId, const int& conn_fd, std::unique_ptr<Packet>& replyPacket);
+    void handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<UdpPacket>& replyPacket);
+    void handleTcpCommand(std::string& packetId, const int& conn_fd, std::unique_ptr<TcpPacket>& replyPacket);
 
 public:
     Logger& logger;

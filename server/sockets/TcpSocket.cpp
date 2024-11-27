@@ -86,7 +86,7 @@ int TcpSocket::acceptConnection(int& conn_fd, struct sockaddr_in& client_addr) {
     return OK;
 }
 
-void TcpSocket::setupConnection(const int &conn_fd) {
+void TcpSocket::setupConnection(const int conn_fd) {
     // Set receive and send timeouts for each connection
     struct timeval tv;
     tv.tv_sec = TCP_CONN_RECV_TIMEOUT;
@@ -101,17 +101,8 @@ void TcpSocket::setupConnection(const int &conn_fd) {
     }
 }
 
-void TcpSocket::sendPacket(const int &conn_fd, std::unique_ptr<Packet> &replyPacket) {
-    std::string packetStr = replyPacket->encode();
-    const char *buffer = packetStr.c_str();
-
-    ssize_t written_bytes = safe_write(conn_fd, buffer, packetStr.size());
-    if (written_bytes == -1) {
-        if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            throw ConnectionTimeoutError();
-        }
-        throw ServerSendError();
-    }
+void TcpSocket::sendPacket(const int conn_fd, std::unique_ptr<TcpPacket> &replyPacket) {
+    replyPacket->send(conn_fd);
 }
 
 const addrinfo *TcpSocket::getSocketInfo() const {

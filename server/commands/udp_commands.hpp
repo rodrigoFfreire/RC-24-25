@@ -3,13 +3,13 @@
 
 #include "../Server.hpp"
 
-void startNewGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<Packet>& replyPacket);
+void startNewGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket);
 
-void tryHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<Packet>& replyPacket);
+void tryHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket);
 
-void quitHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<Packet>& replyPacket);
+void quitHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket);
 
-void debugGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<Packet>& replyPacket);
+void debugGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket);
 
 
 #endif

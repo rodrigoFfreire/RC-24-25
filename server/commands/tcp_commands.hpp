@@ -3,9 +3,9 @@
 
 #include "../Server.hpp"
 
-void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<Packet>& replyPacket);
+void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket);
 
-void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<Packet>& replyPacket);
+void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket);
 
 
 #endif

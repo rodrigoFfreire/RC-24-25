@@ -2,7 +2,7 @@
 #include <iomanip>
 
 void StartNewGamePacket::decode(std::stringstream& packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     playerID = parser.parsePlayerID();
@@ -22,7 +22,7 @@ std::string StartNewGamePacket::encode() const {
 }
 
 void ReplyStartGamePacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     std::string statusStr = parser.parseStatus();
@@ -46,7 +46,7 @@ std::string ReplyStartGamePacket::encode() const {
 }
 
 void TryPacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
     parser.next();
 
     playerID = parser.parsePlayerID();
@@ -67,7 +67,7 @@ std::string TryPacket::encode() const {
 }
 
 void ReplyTryPacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     std::string statusStr = parser.parseStatus();
@@ -126,7 +126,7 @@ std::string ReplyTryPacket::encode() const {
 }
 
 void QuitPacket::decode(std::stringstream& packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     playerID = parser.parsePlayerID();
@@ -141,7 +141,7 @@ std::string QuitPacket::encode() const {
 }
 
 void ReplyQuitPacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     std::string statusStr = parser.parseStatus();
@@ -179,7 +179,7 @@ std::string ReplyQuitPacket::encode() const {
 }
 
 void DebugPacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     playerID = parser.parsePlayerID();
@@ -204,7 +204,7 @@ std::string DebugPacket::encode() const {
 }
 
 void ReplyDebugPacket::decode(std::stringstream &packetStream) {
-    PacketParser parser(packetStream);
+    UdpParser parser(packetStream);
 
     parser.next();
     std::string statusStr = parser.parseStatus();

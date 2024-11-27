@@ -1,9 +1,8 @@
 #include "udp_commands.hpp"
 
-#include "../../common/protocol/Packet.hpp"
-#include "../../common/protocol/udp.hpp"
+#include "../../common/protocol/UDP/udp.hpp"
 
-void startNewGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<Packet>& replyPacket) {
+void startNewGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket) {
     StartNewGamePacket request;
     auto reply = std::make_unique<ReplyStartGamePacket>();
     reply->status = ReplyStartGamePacket::ERR;
@@ -27,7 +26,7 @@ void startNewGameHandler(std::stringstream& packetStream, Server& state, std::un
     replyPacket = std::move(reply);
 }
 
-void tryHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<Packet>& replyPacket) {
+void tryHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<UdpPacket>& replyPacket) {
     TryPacket request;
     auto reply = std::make_unique<ReplyTryPacket>();
     reply->status = ReplyTryPacket::ERR;
@@ -58,7 +57,7 @@ void tryHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<
     replyPacket = std::move(reply);
 }
 
-void quitHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<Packet>& replyPacket) {
+void quitHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<UdpPacket>& replyPacket) {
     QuitPacket request;
     auto reply = std::make_unique<ReplyQuitPacket>();
     reply->status = ReplyQuitPacket::ERR;
@@ -85,7 +84,7 @@ void quitHandler(std::stringstream &packetStream, Server &state, std::unique_ptr
     replyPacket = std::move(reply);
 }
 
-void debugGameHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<Packet>& replyPacket) {
+void debugGameHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<UdpPacket>& replyPacket) {
     DebugPacket request;
     auto reply = std::make_unique<ReplyDebugPacket>();
     reply->status = ReplyDebugPacket::ERR;

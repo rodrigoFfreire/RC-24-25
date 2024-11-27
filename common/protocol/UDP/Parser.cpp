@@ -1,7 +1,8 @@
-#include "Packet.hpp"
+#include "./Parser.hpp"
 #include <vector>
+#include "Parser.hpp"
 
-std::string PacketParser::parseFixedString(size_t size) {
+std::string UdpParser::parseFixedString(size_t size) {
     std::vector<char> buffer(size + 1);
     buffer[size] = '\0';
     char* data = buffer.data();
@@ -14,7 +15,7 @@ std::string PacketParser::parseFixedString(size_t size) {
     return std::string(data);
 }
 
-std::string PacketParser::parseFixedDigitString(size_t size) {
+std::string UdpParser::parseFixedDigitString(size_t size) {
     std::string str(size, '\0');
     for (size_t i = 0; i < size; ++i) {
         char c;
@@ -27,7 +28,7 @@ std::string PacketParser::parseFixedDigitString(size_t size) {
     return str;
 }
 
-void PacketParser::checkNextChar(const char c) {
+void UdpParser::checkNextChar(const char c) {
     char next;
     packetStream >> next;
     if (!packetStream || next != c) {
@@ -36,7 +37,7 @@ void PacketParser::checkNextChar(const char c) {
     return;
 }
 
-char PacketParser::parseColorChar() {
+char UdpParser::parseColorChar() {
     std::string colors = VALID_COLORS;
     char next;
     packetStream >> next;
@@ -46,7 +47,7 @@ char PacketParser::parseColorChar() {
     return next;
 }
 
-unsigned int PacketParser::parseUInt() {
+unsigned int UdpParser::parseUInt() {
     long n;
     packetStream >> n;
     if (!packetStream || n < 0 || n > UINT32_MAX) {
@@ -55,11 +56,11 @@ unsigned int PacketParser::parseUInt() {
     return static_cast<unsigned int>(n);
 }
 
-void PacketParser::next() {
+void UdpParser::next() {
     checkNextChar(' ');
 }
 
-void PacketParser::end() {
+void UdpParser::end() {
     checkNextChar('\n');
     char a = -1;
     packetStream >> a;
@@ -68,15 +69,15 @@ void PacketParser::end() {
     }
 }
 
-std::string PacketParser::parsePacketID() {
+std::string UdpParser::parsePacketID() {
     return parseFixedString(PACKET_ID_LEN);
 }
 
-std::string PacketParser::parseStatus() {
-    return parseFixedDigitString(STATUS_CODE_LEN);
+std::string UdpParser::parseStatus() {
+    return parseFixedString(STATUS_CODE_LEN);
 }
 
-unsigned int PacketParser::parsePlayerID() {
+unsigned int UdpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLAYER_ID_LEN);
     try {
         int n = std::stoul(plID_str);
@@ -86,7 +87,7 @@ unsigned int PacketParser::parsePlayerID() {
     }
 }
 
-char PacketParser::parseChar() {
+char UdpParser::parseChar() {
     char next;
     packetStream >> next;
     if (!packetStream) {
@@ -95,7 +96,7 @@ char PacketParser::parseChar() {
     return next;
 }
 
-void PacketParser::parseKey(char *key) {
+void UdpParser::parseKey(char *key) {
     for (int i = 0; i < SECRET_KEY_LEN; ++i) {
         this->next();
         key[i] = this->parseColorChar();

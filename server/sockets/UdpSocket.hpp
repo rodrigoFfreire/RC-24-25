@@ -12,7 +12,7 @@
 #include "../exceptions/ServerExceptions.hpp"
 #include "../../common/exceptions/SocketErrors.hpp"
 #include "../../common/constants.hpp"
-#include "../../common/protocol/Packet.hpp"
+#include "../../common/protocol/UDP/udp.hpp"
 
 class UdpSocket {
 private:
@@ -33,7 +33,7 @@ public:
 
     void setup();
     int receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr);
-    void sendPacket(std::unique_ptr<Packet>& replyPacket, struct sockaddr_in& client_addr);
+    void sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr);
 
     const struct addrinfo* getSocketInfo() const;
 };
