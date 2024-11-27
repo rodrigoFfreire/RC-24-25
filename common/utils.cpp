@@ -6,10 +6,16 @@ ssize_t safe_read(int fd, char* buffer, size_t n) {
     while (n > 0) {
         ssize_t rd_bytes = read(fd, buffer + completed_bytes, n);
 
-        if (rd_bytes < 0)
-            return -1;
+        if (rd_bytes < 0) {
+          if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            throw ConnectionTimeoutError();
+          } else if (errno == ECONNRESET) {
+            throw ConnectionResetError();
+          }
+          throw ConnectionReadError();
+        }
         else if (rd_bytes == 0)
-            break;
+          throw ConnectionResetError();
 
         n -= (size_t)rd_bytes;
         completed_bytes += rd_bytes;
@@ -24,8 +30,14 @@ ssize_t safe_write(int fd, const char* buffer, size_t n) {
   while (n > 0) {
     ssize_t wr_bytes = write(fd, buffer + completed_bytes, n);
 
-    if (wr_bytes < 0)
-      return -1;
+    if (wr_bytes < 0) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) {
+          throw ConnectionTimeoutError();
+        } else if (errno == ECONNRESET) {
+          throw ConnectionResetError();
+        }
+        throw ConnectionWriteError();
+    }
     else if (wr_bytes == 0)
       break;
 

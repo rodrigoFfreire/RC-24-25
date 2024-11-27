@@ -27,4 +27,36 @@ public:
     PacketEncodingException() : CommonException(errorMsg) {};
 };
 
+class ConnectionTimeoutError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "TCP Connection timed out! ";
+
+public:
+    ConnectionTimeoutError() : CommonError(std::string(errorMsg)) {};
+};
+
+class ConnectionReadError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to receive data from peer! ";
+
+public:
+    ConnectionReadError() : CommonError(std::string(errorMsg)) {};
+};
+
+class ConnectionWriteError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to send data to peer! ";
+
+public:
+    ConnectionWriteError() : CommonError(std::string(errorMsg)) {};
+};
+
+class ConnectionResetError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Peer has reset the connection! ";
+
+public:
+    ConnectionResetError() : CommonError(std::string(errorMsg)) {};
+};
+
 #endif
