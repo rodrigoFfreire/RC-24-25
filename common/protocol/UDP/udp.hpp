@@ -134,7 +134,7 @@ public:
 
 class ReplyDebugPacket : public UdpPacket {
 public:
-    static constexpr const char* packetID = "RBD";
+    static constexpr const char* packetID = "RDB";
     enum Status { OK, NOK, ERR };
     Status status;
 
