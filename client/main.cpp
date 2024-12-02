@@ -7,9 +7,13 @@ int main(int argc, char **argv) {
             return EXIT_SUCCESS;
         }
 
+        Client client(config);
+        while (!client.exit) {
+            client.getNextCommand();
+        }
         // do stuff
-   } catch (...) {
-        return EXIT_FAILURE;
+   } catch (const std::exception& e) {
+        std::cout << "ERROR: " << e.what() << std::endl;
    }
 
    return EXIT_SUCCESS;

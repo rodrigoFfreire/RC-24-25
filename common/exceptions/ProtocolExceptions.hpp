@@ -11,6 +11,14 @@ public:
     InvalidPacketException() : CommonException(errorMsg) {};
 };
 
+class ErrPacketException : public CommonException {
+private:
+    const std::string errorMsg = "This request caused an error";
+
+public:
+    ErrPacketException() : CommonException(errorMsg) {};
+};
+
 class UnexpectedPacketException : public CommonException {
 private:
     const std::string errorMsg = "Unexpected packet received";

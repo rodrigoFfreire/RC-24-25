@@ -10,7 +10,7 @@ Config::Config(int argc, char** argv) {
         setPort(std::string(optarg));
         break;
 
-      case 'v':
+      case 'n':
         setIP(std::string(optarg));
         break;
 
