@@ -101,9 +101,11 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
         case ReplyTryPacket::NOK:
             throw UncontextualizedException();
         case ReplyTryPacket::ENT:
+            state.saveAttempt(request.key, reply.blacks, reply.whites);
             state.endGame(reply.key, GameState::Events::LOST_MAXTRIALS);
             break;
         case ReplyTryPacket::ETM:
+            state.saveAttempt(request.key, reply.blacks, reply.whites);
             state.endGame(reply.key, GameState::Events::LOST_TIME);
             break;
         case ReplyTryPacket::ERR:
