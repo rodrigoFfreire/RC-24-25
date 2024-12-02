@@ -64,7 +64,9 @@ void GameState::endGame(char *key, Events event) {
     isGame = false;
     if (event != Events::WON) {
         std::cout << "The correct key was: ";
-        std::cout << std::string(_key);
+        for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
+            std::cout << colorMap[_key[i]];
+        }
         std::cout << std::endl;
     }
 }
