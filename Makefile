@@ -12,7 +12,9 @@ COMMON_SRCS := $(shell find common -name '*.cpp')
 
 all: clean $(CLIENT_TARGET) $(SERVER_TARGET)
 
-server: clean $(SERVER_TARGET)
+server: clean_server $(SERVER_TARGET)
+
+client: clean_client $(CLIENT_TARGET)
 
 
 $(CLIENT_TARGET):
@@ -21,7 +23,12 @@ $(CLIENT_TARGET):
 $(SERVER_TARGET):
 	$(CC) $(CCFLAGS) $(SERVER_SRCS) $(COMMON_SRCS) -o $(SERVER_TARGET)
 
-clean:
-	rm -f $(CLIENT_TARGET) $(SERVER_TARGET)
+clean_client:
+	rm -f $(CLIENT_TARGET)
 
-.PHONY: all clean server client
+clean_server:
+	rm -f $(SERVER_TARGET)
+
+clean: clean_client clean_server
+
+.PHONY: all clean clean_client clean_server server client
