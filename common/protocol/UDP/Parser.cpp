@@ -80,7 +80,7 @@ std::string UdpParser::parseStatus() {
 unsigned int UdpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLAYER_ID_LEN);
     try {
-        int n = std::stoul(plID_str);
+        long n = std::stoul(plID_str);
         return static_cast<unsigned int>(n);
     } catch (const std::invalid_argument& e) {
         throw InvalidPacketException();
