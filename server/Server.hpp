@@ -2,7 +2,6 @@
 #define SERVER_HPP
 
 #include <unordered_map>
-#include <functional>
 #include "utils/Config.hpp"
 #include "utils/WorkerPool.hpp"
 #include "sockets/UdpSocket.hpp"

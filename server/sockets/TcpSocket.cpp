@@ -101,10 +101,6 @@ void TcpSocket::setupConnection(const int conn_fd) {
     }
 }
 
-void TcpSocket::sendPacket(const int conn_fd, std::unique_ptr<TcpPacket> &replyPacket) {
-    replyPacket->send(conn_fd);
-}
-
 const addrinfo *TcpSocket::getSocketInfo() const {
     return socket_addr.get();
 }

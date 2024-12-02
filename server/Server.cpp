@@ -182,12 +182,12 @@ void Server::handleTcpConnection(int conn_fd) {
 
         // Send reply
         if (replyPacket != nullptr)
-            tcpSocket.sendPacket(conn_fd, replyPacket);
+            replyPacket->send(conn_fd);
     } catch (const CommonException& e) {
         logger.log(Logger::Severity::WARN, e.what(), true);
         try {
             std::unique_ptr<TcpPacket> errPacket = std::make_unique<TcpErrorPacket>();
-            tcpSocket.sendPacket(conn_fd, errPacket);
+            errPacket->send(conn_fd);
         } catch (const ServerSendError& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }
@@ -195,7 +195,7 @@ void Server::handleTcpConnection(int conn_fd) {
         logger.log(Logger::Severity::WARN, e.what(), true);
         try {
             std::unique_ptr<TcpPacket> errPacket = std::make_unique<TcpErrorPacket>();
-            tcpSocket.sendPacket(conn_fd, errPacket);
+            errPacket->send(conn_fd);
         } catch (const ServerSendError& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }

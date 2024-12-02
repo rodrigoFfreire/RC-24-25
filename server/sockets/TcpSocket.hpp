@@ -35,7 +35,6 @@ public:
     void setup();
     int acceptConnection(int& conn_fd, struct sockaddr_in& client_addr);
     void setupConnection(const int conn_fd);
-    void sendPacket(const int conn_fd, std::unique_ptr<TcpPacket>& replyPacket);
     const addrinfo* getSocketInfo() const;
 };
 
