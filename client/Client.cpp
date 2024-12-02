@@ -61,6 +61,7 @@ void Client::getNextCommand() {
         if (command_id == "exit") {
             exit = true;
             quitHandler(game_state, udp_socket, command_stream);
+            return;
         }
 
         handleCommand(command_id, command_stream);
