@@ -62,6 +62,7 @@ void buildTryPacket(GameState& state, std::stringstream& command_stream, TryPack
     for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
         char c;
         command_stream >> c;
+        c = std::toupper(c);
         if (valid_colors.find(c) == std::string::npos || command_stream.eof()) {
             throw InvalidKeyException();
         }
@@ -101,11 +102,11 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
         case ReplyTryPacket::NOK:
             throw UncontextualizedException();
         case ReplyTryPacket::ENT:
-            state.saveAttempt(request.key, reply.blacks, reply.whites);
+            state.saveAttempt(request.key, 0, 0);
             state.endGame(reply.key, GameState::Events::LOST_MAXTRIALS);
             break;
         case ReplyTryPacket::ETM:
-            state.saveAttempt(request.key, reply.blacks, reply.whites);
+            state.saveAttempt(request.key, 0, 0);
             state.endGame(reply.key, GameState::Events::LOST_TIME);
             break;
         case ReplyTryPacket::ERR:
@@ -175,6 +176,7 @@ void buildDebugGamePacket(std::stringstream& command_stream, DebugPacket& packet
     for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
         char c;
         command_stream >> c;
+        c = std::toupper(c);
         if (valid_colors.find(c) == std::string::npos || command_stream.eof()) {
             throw InvalidKeyException();
         }
