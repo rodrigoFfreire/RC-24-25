@@ -95,7 +95,7 @@ void GameState::printState() {
         return;
     }
     std::cout << "\033[2J\033[H"; // Clears the screen
-    std::cout << "Trial\t\t\tBlacks\t\t\tWhites\t\t\tSecret Key:\t";
+    std::cout << "Trial\t\tBlacks\t\tWhites\t\tSecret Key:\t\t";
     if (finished || _debug) {
         for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
             std::cout << colorMap[_key[i]] << '\t';
@@ -111,11 +111,12 @@ void GameState::printState() {
         const auto& guess = guesses[i];
         const auto& fb = feedback[i];
 
-        std::cout << i + 1 << "\t\t\t";
+        std::cout << i + 1 << "\t\t";
         for (size_t a = 0; a < fb[0]; ++a) {std::cout << "⚫";};
-        std::cout << "\t\t\t";
+        std::cout << "\t\t";
         for (size_t a = 0; a < fb[1]; ++a) {std::cout << "⚪";};
-        std::cout << "\t\t\t            \t";
+        std::cout << "\t\t            \t";
+        if (fb[0] < SECRET_KEY_LEN && fb[1] < SECRET_KEY_LEN) {std::cout << '\t';}
         for (size_t j = 0; j < SECRET_KEY_LEN; ++j) {
             std::cout << colorMap[guess[j]] << '\t';
         }
