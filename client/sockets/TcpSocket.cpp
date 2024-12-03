@@ -36,6 +36,10 @@ void TcpSocket::createSocket() {
 }
 
 TcpSocket::~TcpSocket() {
+    end();
+}
+
+void TcpSocket::end() {
     if (socket_fd != -1) {
         close(socket_fd);
         socket_fd = -1;

@@ -15,14 +15,14 @@ private:
 
     std::string parseFixedString(size_t size);
     std::string parseFixedDigitString(size_t size);
-    std::string parseVariableString(size_t max_size);
-    void checkNextChar(const char c);
+    std::string parseVariableString(size_t max_size, char end);
 
 public:
     TcpParser(int conn_fd) : connection_fd(conn_fd) {};
 
     void next();
     void end();
+    void checkNextChar(const char c);
     std::string parsePacketID();
     std::string parseStatus();
     std::string parseFileName();

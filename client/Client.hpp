@@ -12,7 +12,7 @@
 
 class Client {
     typedef void (*HandlerUdpFunc)(GameState&, UdpSocket&, std::stringstream&);
-    typedef void (*HandlerTcpFunc)(GameState&, TcpSocket&, std::stringstream&);
+    typedef void (*HandlerTcpFunc)(GameState&, TcpSocket&);
 
 private:
     TcpSocket tcp_socket;

@@ -22,7 +22,7 @@ std::string TcpParser::parseFixedDigitString(size_t size) {
     return buffer;
 }
 
-std::string TcpParser::parseVariableString(size_t max_size) {
+std::string TcpParser::parseVariableString(size_t max_size, char end) {
     size_t completed_bytes = 0;
     std::string buffer(max_size, '\0');
 
@@ -41,7 +41,7 @@ std::string TcpParser::parseVariableString(size_t max_size) {
           throw ConnectionResetError();
 
         if (std::isspace(buffer[completed_bytes])) {
-            if (buffer[completed_bytes] != ' ') {
+            if (buffer[completed_bytes] != end) {
                 throw InvalidPacketException();
             }
             completed_bytes += rd_bytes;
@@ -65,7 +65,7 @@ void TcpParser::checkNextChar(const char c) {
 }
 
 std::string TcpParser::parseFileName() {
-    return parseVariableString(FNAME_MAX);
+    return parseVariableString(FNAME_MAX, ' ');
 }
 
 void TcpParser::next() {
@@ -95,12 +95,15 @@ unsigned int TcpParser::parsePlayerID() {
 }
 
 unsigned short TcpParser::parseFileSize() {
-    std::string filesize_str = parseVariableString(FSIZE_STR_MAX);
+    std::string filesize_str = parseVariableString(FSIZE_STR_MAX, ' ');
 
     try {
         long fsize_long = std::stoul(filesize_str);
         if (fsize_long <= 0 || fsize_long > FSIZE_MAX) {
             throw std::out_of_range("");
+        }
+        if (fsize_long > 999) {
+            checkNextChar('\n');
         }
         return static_cast<unsigned short>(fsize_long);
     } catch (const std::exception& e) {

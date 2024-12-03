@@ -78,6 +78,10 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
     std::stringstream responseStream;
 
     try {
+        if (!state.isGame()) {
+            throw UncontextualizedException();
+        }
+        
         buildTryPacket(state, command_stream, request);
         socket.sendPacket(&request);
         socket.receivePacket(responseStream);
@@ -87,6 +91,8 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
 
         switch (reply.status) {
         case ReplyStartGamePacket::OK:
+            if (reply.trial < request.trial)
+                break;
             state.saveAttempt(request.key, reply.blacks, reply.whites);
             if (reply.blacks == SECRET_KEY_LEN) {
                 state.endGame(request.key, GameState::Events::WON);

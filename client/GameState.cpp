@@ -68,7 +68,7 @@ void GameState::endGame(char *key, Events event) {
 }
 
 unsigned int GameState::getPlid() {
-    if (!_isGame) {
+    if (!_isGame && !_finished) {
         throw UncontextualizedException();
     }
     return plid;

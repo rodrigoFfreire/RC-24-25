@@ -40,7 +40,7 @@ private:
     static constexpr const char* errorMsg = "TCP Connection timed out! ";
 
 public:
-    ConnectionTimeoutError() : CommonError(std::string(errorMsg)) {};
+    ConnectionTimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionReadError : public CommonError {
@@ -48,7 +48,7 @@ private:
     static constexpr const char* errorMsg = "Failed to receive data from peer! ";
 
 public:
-    ConnectionReadError() : CommonError(std::string(errorMsg)) {};
+    ConnectionReadError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionWriteError : public CommonError {
@@ -56,7 +56,7 @@ private:
     static constexpr const char* errorMsg = "Failed to send data to peer! ";
 
 public:
-    ConnectionWriteError() : CommonError(std::string(errorMsg)) {};
+    ConnectionWriteError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionResetError : public CommonError {
@@ -64,7 +64,7 @@ private:
     static constexpr const char* errorMsg = "Peer has reset the connection! ";
 
 public:
-    ConnectionResetError() : CommonError(std::string(errorMsg)) {};
+    ConnectionResetError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 #endif

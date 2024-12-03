@@ -1,4 +1,5 @@
 #include "tcp.hpp"
+#include <iostream>
 
 void ShowTrialsPacket::read(int connection_fd) {
     TcpParser parser(connection_fd);
@@ -10,6 +11,7 @@ void ShowTrialsPacket::read(int connection_fd) {
 
 void ShowTrialsPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
+    encoded_stream << packetID << ' ';
     encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID << '\n';
     std::string encoded_str = encoded_stream.str();
 
@@ -39,6 +41,7 @@ void ReplyShowTrialsPacket::read(int connection_fd) {
         else
             throw InvalidPacketException();
 
+        parser.next();
         fname = parser.parseFileName();
         fsize = parser.parseFileSize();
         fdata = parser.parseFile(fsize);
@@ -61,9 +64,40 @@ void ShowScoreboardPacket::read(int connection_fd) {
 }
 
 void ShowScoreboardPacket::send(int connection_fd) const {
-    std::string encoded_str(packetID + '\n');
+    std::ostringstream encoded_stream;
+    encoded_stream << packetID << '\n';
+    std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
+}
+
+void ReplyShowScoreboardPacket::read(int connection_fd) {
+    TcpParser parser(connection_fd);
+
+    std::string parsed_id = parser.parsePacketID();
+    if (parsed_id == TcpErrorPacket::packetID) {
+        throw ErrPacketException();
+    }
+    if (parsed_id != ReplyShowScoreboardPacket::packetID) {
+        throw InvalidPacketException();
+    }
+
+    parser.next();
+    std::string statusStr = parser.parseStatus();
+    if (statusStr == "EMP") {
+        status = EMPTY;
+        parser.checkNextChar('T');
+        parser.checkNextChar('Y');
+    } else if (statusStr == "OK ") {
+        status = OK;
+
+        fname = parser.parseFileName();
+        fsize = parser.parseFileSize();
+        fdata = parser.parseFile(fsize);
+    } else {
+        throw InvalidPacketException();
+    }
+    parser.end();
 }
 
 void ReplyShowScoreboardPacket::send(int connection_fd) const

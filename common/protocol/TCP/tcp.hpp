@@ -55,7 +55,7 @@ public:
 
 class ReplyShowScoreboardPacket : public TcpPacket {
 public:
-    static constexpr const char* packetID = "STR";
+    static constexpr const char* packetID = "RSS";
     enum Status { EMPTY, OK };
     Status status;
     std::string fname;
@@ -73,7 +73,7 @@ public:
         }
     };
     
-    void read(int connection_fd) override {return;};
+    void read(int connection_fd) override;
     void send(int connection_fd) const override;
 };
 
