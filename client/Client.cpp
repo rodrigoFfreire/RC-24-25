@@ -25,7 +25,9 @@ void Client::handleCommand(std::string& command_id, std::stringstream& command_s
 
     auto tcp_cmd = tcp_handlers.find(command_id);
     if (tcp_cmd != tcp_handlers.end()) {
-        tcp_cmd->second(game_state, tcp_socket, command_stream);
+        tcp_socket.setup();
+        tcp_cmd->second(game_state, tcp_socket);
+        tcp_socket.end();
         return;
     }
 
