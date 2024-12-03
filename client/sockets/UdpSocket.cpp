@@ -83,14 +83,14 @@ int UdpSocket::receivePacket(std::stringstream& packetStream) {
         }
         throw ClientReceiveError();
     }
-    std::cerr << "<< " << buffer << std::endl;
     packetStream.write(buffer, received_bytes);
+    std::cerr << packetStream.str() << std::endl;
     return OK;
 }
 
 int UdpSocket::sendPacket(UdpPacket *packet) {
     std::string packetStr = packet->encode();
-    std::cerr << "DEBUG: " << packetStr << std::endl;
+    std::cerr << ">> " << packetStr << std::endl;
     const char* buffer = packetStr.c_str();
     if (sendto(socket_fd,
                 buffer,

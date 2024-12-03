@@ -1,8 +1,4 @@
 #include "GameState.hpp"
-#include "../common/constants.hpp"
-#include <iostream>
-#include <cstring>
-#include <unordered_map>
 
 std::unordered_map<char, std::string> colorMap;
 
@@ -24,8 +20,8 @@ void GameState::registerColorMap() {
 void GameState::startGame(unsigned int id, char *key, bool debug) {
     plid = id;
     trial = 1;
-    isGame = true;
-    finished = false;
+    _isGame = true;
+    _finished = false;
     _debug = debug;
 
     memset(_key, 0, SECRET_KEY_LEN + 1);
@@ -42,7 +38,7 @@ void GameState::startGame(unsigned int id, char *key, bool debug) {
 void GameState::endGame(char *key, Events event) {
     strncpy(_key, key, SECRET_KEY_LEN);
 
-    finished = true;
+    _finished = true;
     printState();
 
     switch (event) {
@@ -61,7 +57,7 @@ void GameState::endGame(char *key, Events event) {
         break;
     }
 
-    isGame = false;
+    _isGame = false;
     if (event != Events::WON) {
         std::cout << "The correct key was: ";
         for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
@@ -72,11 +68,14 @@ void GameState::endGame(char *key, Events event) {
 }
 
 unsigned int GameState::getPlid() {
+    if (!_isGame) {
+        throw UncontextualizedException();
+    }
     return plid;
 }
 
 unsigned int GameState::newAttempt() {
-    return (isGame ? trial++ : trial);
+    return (_isGame ? trial++ : trial);
 }
 
 unsigned int GameState::getTrial() {
@@ -90,13 +89,27 @@ void GameState::saveAttempt(char *att, unsigned int b, unsigned int w) {
     feedback.push_back({b, w});
 }
 
+void GameState::saveFile(std::string& fname, std::string& fdata) {
+    try {
+        std::ofstream file(fname);
+        file.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+
+        file << fdata;
+        file.close();
+
+        std::cout << fdata; // Print the file
+    } catch (const std::exception& e) {
+        throw SaveFileError();
+    }
+}
+
 void GameState::printState() {
-    if (!isGame) {
+    if (!_isGame) {
         return;
     }
-    std::cout << "\033[2J\033[H"; // Clears the screen
+    std::cout << "\033[2J\033[H"; // Clears the screencl
     std::cout << "Trial\t\tBlacks\t\tWhites\t\tSecret Key:\t\t";
-    if (finished || _debug) {
+    if (_finished || _debug) {
         for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
             std::cout << colorMap[_key[i]] << '\t';
         }

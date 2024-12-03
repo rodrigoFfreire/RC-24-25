@@ -2,6 +2,7 @@
 #define COMMON_PROTOCOL_TCP_PACKETS_HPP
 
 #include "Parser.hpp"
+#include <iomanip>
 
 class TcpPacket {
 public:
@@ -12,7 +13,7 @@ public:
 class ShowTrialsPacket : public TcpPacket {
 public:
     static constexpr const char* packetID = "STR";
-    uint32_t playerID;
+    unsigned int playerID;
 
     void read(int connection_fd) override;
     void send(int connection_fd) const override;
@@ -25,7 +26,7 @@ public:
     Status status;
     std::string fname;
     std::string fdata;
-    uint32_t fsize;
+    unsigned short fsize;
 
     std::string statusToStr(Status status) const {
         switch (status) {
@@ -40,7 +41,7 @@ public:
         }
     };
 
-    void read(int connection_fd) override {(void)connection_fd;};
+    void read(int connection_fd) override;
     void send(int connection_fd) const override;
 };
 
@@ -59,7 +60,7 @@ public:
     Status status;
     std::string fname;
     std::string fdata;
-    uint32_t fsize;
+    unsigned short fsize;
 
     std::string statusToStr(Status status) const {
         switch (status) {
@@ -72,7 +73,7 @@ public:
         }
     };
     
-    void read(int connection_fd) override {(void)connection_fd;};
+    void read(int connection_fd) override {return;};
     void send(int connection_fd) const override;
 };
 

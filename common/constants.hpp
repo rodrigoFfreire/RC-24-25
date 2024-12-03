@@ -31,5 +31,6 @@
 
 #define FNAME_MAX               24
 #define FSIZE_MAX               2048
+#define FSIZE_STR_MAX           4
 
 #endif

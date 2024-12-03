@@ -34,7 +34,8 @@ public:
     ~TcpSocket();
 
     void setup();
-    void receivePacket(std::stringstream& packetStream);
+    void receivePacket(TcpPacket *packet);
+    void sendPacket(TcpPacket *packet);
     const addrinfo* getSocketInfo() const;
 };
 

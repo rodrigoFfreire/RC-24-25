@@ -3,12 +3,18 @@
 
 #include <vector>
 #include <array>
+#include <iostream>
+#include <cstring>
+#include <unordered_map>
+#include <fstream>
 #include "../common/constants.hpp"
+#include "exceptions/ClientExceptions.hpp"
+#include "exceptions/CommandExceptions.hpp"
 
 class GameState {
 private:
-    bool isGame;
-    bool finished;
+    bool _isGame;
+    bool _finished;
     bool _debug;
     unsigned int plid;
     unsigned int trial;
@@ -19,18 +25,20 @@ private:
     void registerColorMap();
 
 public:
-    GameState() : isGame(false), finished(false) {
+    GameState() : _isGame(false), _finished(false) {
         registerColorMap();
     };
 
     enum Events { LOST_TIME, LOST_MAXTRIALS, WON, QUIT };
 
+    bool isGame() {return _isGame;};
     void startGame(unsigned int id, char *key, bool debug);
     void endGame(char *key, Events event);
     unsigned int getPlid();
     unsigned int newAttempt();
     unsigned int getTrial();
     void saveAttempt(char *att, unsigned int b, unsigned int w);
+    void saveFile(std::string& fname, std::string& fdata);
     void printState();
 };
 

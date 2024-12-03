@@ -29,10 +29,26 @@ public:
 
 class TimeoutError : public CommonError {
 private:
-    static constexpr const char* errorMsg = "Failed to communicate with server within reasonable time!";
+    static constexpr const char* errorMsg = "Failed to communicate with server within reasonable time! ";
 
 public:
     TimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class SaveFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to save information to a file! ";
+
+public:
+    SaveFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class PrintFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to print file information! ";
+
+public:
+    PrintFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 #endif

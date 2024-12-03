@@ -67,6 +67,20 @@ void TcpSocket::setup() {
     }
 }
 
+void TcpSocket::receivePacket(TcpPacket *packet) {
+    if (packet == nullptr)
+        return;
+
+    packet->read(socket_fd);
+}
+
+void TcpSocket::sendPacket(TcpPacket *packet) {
+    if (packet == nullptr)
+        return;
+
+    packet->send(socket_fd);
+}
+
 const addrinfo *TcpSocket::getSocketInfo() const {
     return socket_addr.get();
 }
