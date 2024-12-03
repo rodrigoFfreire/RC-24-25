@@ -16,6 +16,7 @@ private:
     bool _isGame;
     bool _finished;
     bool _debug;
+    bool _unicode;
     unsigned int plid;
     unsigned int trial;
     std::vector<std::array<char, SECRET_KEY_LEN + 1>> guesses;
@@ -25,7 +26,7 @@ private:
     void registerColorMap();
 
 public:
-    GameState() : _isGame(false), _finished(false) {
+    GameState(bool unicode) : _isGame(false), _finished(false), _unicode(unicode) {
         registerColorMap();
     };
 

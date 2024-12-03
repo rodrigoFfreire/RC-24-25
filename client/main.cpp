@@ -8,6 +8,9 @@ int main(int argc, char **argv) {
         }
 
         Client client(config);
+        
+        std::cout << "Run the \"?\" command to get help!" << std::endl;
+
         while (!client.exit) {
             client.getNextCommand();
         }

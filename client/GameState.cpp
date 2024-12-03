@@ -3,18 +3,25 @@
 std::unordered_map<char, std::string> colorMap;
 
 void GameState::registerColorMap() {
-    //colorMap['R'] = "\033[38;5;196mR\033[0m";
-    //colorMap['G'] = "\033[38;5;46mG\033[0m";
-    //colorMap['B'] = "\033[38;5;51mB\033[0m";
-    //colorMap['Y'] = "\033[38;5;226mY\033[0m";
-    //colorMap['O'] = "\033[38;5;208mO\033[0m";
-    //colorMap['P'] = "\033[38;5;57mP\033[0m";
-    colorMap['R'] = "🔴";
-    colorMap['G'] = "🟢";
-    colorMap['B'] = "🔵";
-    colorMap['Y'] = "🟡";
-    colorMap['O'] = "🟠";
-    colorMap['P'] = "🟣";
+    if (_unicode) {
+        colorMap['R'] = "🔴";
+        colorMap['G'] = "🟢";
+        colorMap['B'] = "🔵";
+        colorMap['Y'] = "🟡";
+        colorMap['O'] = "🟠";
+        colorMap['P'] = "🟣";
+        colorMap['b'] = "⚫";
+        colorMap['W'] = "⚪";
+    } else {
+        colorMap['R'] = "\033[38;5;196mR\033[0m";
+        colorMap['G'] = "\033[38;5;46mG\033[0m";
+        colorMap['B'] = "\033[38;5;51mB\033[0m";
+        colorMap['Y'] = "\033[38;5;226mY\033[0m";
+        colorMap['O'] = "\033[38;5;208mO\033[0m";
+        colorMap['P'] = "\033[38;5;57mP\033[0m";
+        colorMap['W'] = "X";
+        colorMap['b'] = "X";
+    }
 }
 
 void GameState::startGame(unsigned int id, char *key, bool debug) {
@@ -107,7 +114,7 @@ void GameState::printState() {
     if (!_isGame) {
         return;
     }
-    std::cout << "\033[2J\033[H"; // Clears the screencl
+    std::cout << "\033[2J\033[H"; // Clears the screen
     std::cout << "Trial\t\tBlacks\t\tWhites\t\tSecret Key:\t\t";
     if (_finished || _debug) {
         for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
@@ -125,9 +132,9 @@ void GameState::printState() {
         const auto& fb = feedback[i];
 
         std::cout << i + 1 << "\t\t";
-        for (size_t a = 0; a < fb[0]; ++a) {std::cout << "⚫";};
+        for (size_t a = 0; a < fb[0]; ++a) {std::cout << colorMap['b'];};
         std::cout << "\t\t";
-        for (size_t a = 0; a < fb[1]; ++a) {std::cout << "⚪";};
+        for (size_t a = 0; a < fb[1]; ++a) {std::cout << colorMap['W'];};
         std::cout << "\t\t            \t";
         if (fb[0] < SECRET_KEY_LEN && fb[1] < SECRET_KEY_LEN) {std::cout << '\t';}
         for (size_t j = 0; j < SECRET_KEY_LEN; ++j) {

@@ -20,6 +20,7 @@ private:
     std::unordered_map<std::string, HandlerUdpFunc> udp_handlers;
     std::unordered_map<std::string, HandlerTcpFunc> tcp_handlers;
     GameState game_state;
+    bool unicode;
 
     void registerCommands();
     void handleCommand(std::string& command, std::stringstream& command_stream);

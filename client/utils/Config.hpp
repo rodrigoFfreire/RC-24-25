@@ -10,6 +10,7 @@
 class Config {
 public:
     bool help           = false;
+    bool unicode        = false;
     std::string ipaddr  = DEFAULT_IPADRR;
     std::string port    = DEFAULT_PORT;
     std::string fpath;
@@ -17,6 +18,7 @@ public:
     Config(int argc, char **argv);
     void setPort(const std::string& portStr);
     void setIP(const std::string& ipaddr);
+    void setUnicode();
     void printUsage(std::ostream& s);  
 };
 
