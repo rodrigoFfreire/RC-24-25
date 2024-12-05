@@ -81,39 +81,44 @@ void Client::getNextCommand() {
 
 void Client::printHelp() {
     std::cout << "\033[2J\033[H";
-    std::cout << "MasterMind: Commands\n\n";
-    std::cout << "-> start <PLID> <MAXTIME>: Starts a new game. PLID must be [0, 999999] and MAXTIME must not exceed 600\n";
-    std::cout << "-> try <key>. Given an ongoing game, sends an attempt with that key. Check the key format below\n";
-    std::cout << "-> show_trials, st: Shows information about your last played game. Must have an ongoing or finished game to have an associated PLID\n";
-    std::cout << "-> scoreboard, sb: Shows the TOP 10 players and their corresponding results\n";
-    std::cout << "-> debug <PLID> <MAXTIME> <key>: Starts a new debug game where you define the secret key\n";
-    std::cout << "-> quit: Quits an ongoing game but not the player\n";
-    std::cout << "-> exit: Exits the player\n\n";
+    std::cout << "\
+     MasterMind: Commands\n\n \
+    -> start <PLID> <MAXTIME>: Starts a new game. PLID must be [0, 999999] and MAXTIME must not exceed 600\n \
+    -> start <PLID> <MAXTIME>: Starts a new game. PLID must be [0, 999999] and MAXTIME must not exceed 600\n \
+    -> try <key>. Given an ongoing game, sends an attempt with that key. Check the key format below\n \
+    -> show_trials, st: Shows information about your last played game. Must have an ongoing or finished game to have an associated PLID\n \
+    -> scoreboard, sb: Shows the TOP 10 players and their corresponding results\n \
+    -> debug <PLID> <MAXTIME> <key>: Starts a new debug game where you define the secret key\n \
+    -> quit: Quits an ongoing game but not the player\n \
+    -> exit: Exits the player\n\n \
+    MasterMind: Secret Key\n\n \
+    The secret key is composed of 4 colors (can be repeated) identified by their first letter\n \
+    The key can be specified with or without whitespace in between each character!\n \
+    The valid colors are:\n";
 
-    std::cout << "MasterMind: Secret Key\n\n";
-    std::cout << "The secret key is composed of 4 colors (can be repeated) identified by their first letter\n";
-    std::cout << "The key can be specified with or without whitespace in between each character!\n";
-    std::cout << "The valid colors are:\n";
     if (unicode) {
-        std::cout << "\t- Red (🔴) - R or r\n";
-        std::cout << "\t- Green (🟢) - G or g\n";
-        std::cout << "\t- Blue (🔵) - B or b\n";
-        std::cout << "\t- Yellow (🟡) - Y or y\n";
-        std::cout << "\t- Orange (🟠) - O or o\n";
-        std::cout << "\t- Purple (🟣) - P or p\n\n";
+        std::cout << " \
+        - Red (🔴) - R or r\n \
+        - Green (🟢) - G or g\n \
+        - Blue (🔵) - B or b\n \
+        - Yellow (🟡) - Y or y\n \
+        - Orange (🟠) - O or o\n \
+        - Purple (🟣) - P or p\n\n";
     } else {
-        std::cout << "\t- Red - R or r\n";
-        std::cout << "\t- Green - G or g\n";
-        std::cout << "\t- Blue - B or b\n";
-        std::cout << "\t- Yellow - Y or y\n";
-        std::cout << "\t- Orange - O or o\n";
-        std::cout << "\t- Purple - P or p\n\n";
+        std::cout << " \
+        - Red - R or r\n \
+        - Green - G or g\n \
+        - Blue - B or b\n \
+        - Yellow - Y or y\n \
+        - Orange - O or o\n \
+        - Purple - P or p\n\n";
     }
-    std::cout << "Examples:\n";
-    std::cout << "\t- try GROG\n";
-    std::cout << "\t- try B B B B\n";
-    std::cout << "\t- debug 106485 337 boby\n\n";
-    std::cout << "Press ENTER to continue..." << std::endl;
+    std::cout << " \
+    Examples:\n \
+    \t- try GROG\n \
+    \t- try B B B B\n \
+    \t- debug 106485 337 boby\n\n \
+    Press ENTER to continue..." << std::endl;
 
     std::cin.get();
     std::cout << "\033[2J\033[H" << std::endl;
