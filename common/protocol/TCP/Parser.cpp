@@ -44,7 +44,7 @@ std::string TcpParser::parseVariableString(size_t max_size, char end) {
             if (buffer[completed_bytes] != end) {
                 throw InvalidPacketException();
             }
-            completed_bytes += rd_bytes;
+            buffer[completed_bytes] = '\0';
             break;
         }
 

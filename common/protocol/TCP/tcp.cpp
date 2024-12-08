@@ -85,9 +85,9 @@ void ReplyShowScoreboardPacket::read(int connection_fd) {
     parser.next();
     std::string statusStr = parser.parseStatus();
     if (statusStr == "EMP") {
-        status = EMPTY;
         parser.checkNextChar('T');
         parser.checkNextChar('Y');
+        status = EMPTY;
     } else if (statusStr == "OK ") {
         status = OK;
 
