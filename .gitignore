@@ -1,6 +1,10 @@
 .vscode
 .DS_STORE
 *.dSYM
+*.txt
+*.log
 
 GS
 player
+
+test/
