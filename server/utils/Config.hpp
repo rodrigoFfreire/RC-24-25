@@ -9,10 +9,11 @@
 
 class Config {
 public:
-    bool help           = false;
-    bool verbose        = false;
-    std::string port    = DEFAULT_PORT;
+    bool help               = false;
+    bool verbose            = false;
+    std::string port        = DEFAULT_PORT;
     std::string fpath;
+    std::string dataPath    = DEFAULT_DATA_PATH;
 
     Config(int argc, char **argv);
     void setPort(const std::string& portStr);

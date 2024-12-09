@@ -4,6 +4,7 @@
 #define DEFAULT_IPADRR          "127.0.0.1"
 #define DEFAULT_PORT            "58065"
 #define DEAFULT_PLID            "106485"
+#define DEFAULT_DATA_PATH       ".data"
 
 #define LOGGER_LEVEL_INFO       "INFO"
 #define LOGGER_LEVEL_WARNING    "WARN"

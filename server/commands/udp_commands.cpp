@@ -5,20 +5,26 @@
 void startNewGameHandler(std::stringstream& packetStream, Server& state, std::unique_ptr<UdpPacket>& replyPacket) {
     StartNewGamePacket request;
     auto reply = std::make_unique<ReplyStartGamePacket>();
-    reply->status = ReplyStartGamePacket::ERR;
+    reply->status = ReplyStartGamePacket::OK;
 
     try {
+        std::time_t now = state.getCommandTime();
         request.decode(packetStream);
         
         // Create game
-        std::string key = "R R R R R";
-        reply->status = ReplyStartGamePacket::OK;
+        std::ostringstream oss;
+        oss << std::setw(6) << std::setfill('0') << request.playerID;
+        std::string plid = oss.str();
+
+        std::string key = state.store.createGame(plid, request.time, GameStore::GameMode::PLAY, now);
 
         std::stringstream ss;
-        ss << "[Player " << request.playerID << "] > New game (max " << request.time << "s); " << key;
+        ss << "[Player " << plid << "] > New game (max " << request.time << "s); " << key;
         state.logger.log(Logger::Severity::INFO, ss.str(), true);
-
-    } catch (const InvalidPacketException& e) {
+    } catch (const OngoingGameException& e) {
+        reply->status = ReplyStartGamePacket::NOK;
+        state.logger.log(Logger::Severity::WARN, e.what(), true);
+    } catch (const std::exception& e) {
         reply->status = ReplyStartGamePacket::ERR;
         state.logger.log(Logger::Severity::WARN, e.what(), true);
     }

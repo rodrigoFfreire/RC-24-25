@@ -35,4 +35,37 @@ public:
     PeerNameResolveError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
+class OpenFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to open a file! ";
+
+public:
+    OpenFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class ReadFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to read file contents! ";
+
+public:
+    ReadFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class WriteFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to write file contents! ";
+
+public:
+    WriteFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+class MoveFileError : public CommonError {
+private:
+    static constexpr const char* errorMsg = "Failed to move file! ";
+
+public:
+    MoveFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+};
+
+
 #endif

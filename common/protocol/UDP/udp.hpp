@@ -12,7 +12,7 @@ public:
 class StartNewGamePacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "SNG";
-    unsigned int time;
+    unsigned short time;
     unsigned int playerID;
 
     void decode(std::stringstream& packetStream) override;

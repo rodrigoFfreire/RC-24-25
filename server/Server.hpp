@@ -7,6 +7,7 @@
 #include "sockets/UdpSocket.hpp"
 #include "sockets/TcpSocket.hpp"
 #include "../common/Logger.hpp"
+#include "GameStore.hpp"
 
 class Server;
 
@@ -30,11 +31,13 @@ private:
 
 public:
     Logger& logger;
+    GameStore store;
 
     Server(Config& config, Logger& logger);
     void runUdp();
     void runTcp();
     void handleTcpConnection(const int conn_fd); // Worker function
+    std::time_t getCommandTime();
 };
 
 #endif

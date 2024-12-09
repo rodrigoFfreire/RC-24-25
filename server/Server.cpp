@@ -8,7 +8,7 @@
 extern volatile std::sig_atomic_t terminate_flag;
 
 Server::Server(Config& config, Logger& logger) 
-    : port(config.port), udpSocket(port), tcpSocket(port), logger(logger) {
+    : port(config.port), udpSocket(port), tcpSocket(port), logger(logger), store(config.dataPath) {
     registerCommands();
 };
 
@@ -205,4 +205,8 @@ void Server::handleTcpConnection(int conn_fd) {
 
     close(conn_fd);
     return;
+}
+
+std::time_t Server::getCommandTime() {
+    return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 }
