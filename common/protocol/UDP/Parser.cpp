@@ -1,10 +1,7 @@
-#include "./Parser.hpp"
-#include <vector>
 #include "Parser.hpp"
 
 std::string UdpParser::parseFixedString(size_t size) {
-    std::vector<char> buffer(size + 1);
-    buffer[size] = '\0';
+    std::string buffer(size, '\0');
     char* data = buffer.data();
 
     packetStream.read(data, size);
@@ -96,7 +93,7 @@ char UdpParser::parseChar() {
     return next;
 }
 
-void UdpParser::parseKey(char *key) {
+void UdpParser::parseKey(std::string& key) {
     for (int i = 0; i < SECRET_KEY_LEN; ++i) {
         this->next();
         key[i] = this->parseColorChar();

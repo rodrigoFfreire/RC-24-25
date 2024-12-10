@@ -26,7 +26,7 @@ public:
     unsigned int parsePlayerID();
     unsigned int parseUInt();
     char parseChar();
-    void parseKey(char *key);
+    void parseKey(std::string& key);
 };
 
 #endif

@@ -47,7 +47,7 @@ public:
     static constexpr const char* packetID = "TRY";
     unsigned int playerID;
     unsigned int trial;
-    char key[SECRET_KEY_LEN];
+    std::string key;
 
     void decode(std::stringstream& packetStream) override;
     std::string encode() const override;
@@ -61,7 +61,7 @@ public:
     unsigned int trial;
     unsigned int whites;
     unsigned int blacks;
-    char key[SECRET_KEY_LEN];
+    std::string key;
 
     std::string statusToStr(Status status) const {
         switch (status) {
@@ -102,7 +102,7 @@ public:
     static constexpr const char* packetID = "RQT";
     enum Status { OK, NOK, ERR };
     Status status;
-    char key[SECRET_KEY_LEN];
+    std::string key;
 
     std::string statusToStr(Status status) const {
         switch (status) {
@@ -126,7 +126,7 @@ public:
     static constexpr const char* packetID = "DBG";
     unsigned int playerID;
     unsigned int time;
-    char key[SECRET_KEY_LEN];
+    std::string key;
 
     void decode(std::stringstream& packetStream) override;
     std::string encode() const override;

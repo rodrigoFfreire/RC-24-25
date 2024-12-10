@@ -56,6 +56,8 @@ std::string ReplyStartGamePacket::encode() const {
 }
 
 void TryPacket::decode(std::stringstream &packetStream) {
+    key.resize(SECRET_KEY_LEN, '\0');
+
     UdpParser parser(packetStream);
     parser.next();
 
@@ -77,6 +79,8 @@ std::string TryPacket::encode() const {
 }
 
 void ReplyTryPacket::decode(std::stringstream &packetStream) {
+    key.resize(SECRET_KEY_LEN, '\0');
+
     UdpParser parser(packetStream);
 
     std::string parsed_id = parser.parsePacketID();
@@ -158,6 +162,8 @@ std::string QuitPacket::encode() const {
 }
 
 void ReplyQuitPacket::decode(std::stringstream &packetStream) {
+    key.resize(SECRET_KEY_LEN, '\0');
+
     UdpParser parser(packetStream);
 
     std::string parsed_id = parser.parsePacketID();
@@ -205,6 +211,8 @@ std::string ReplyQuitPacket::encode() const {
 }
 
 void DebugPacket::decode(std::stringstream &packetStream) {
+    key.resize(SECRET_KEY_LEN, '\0');
+
     UdpParser parser(packetStream);
 
     parser.next();
