@@ -4,9 +4,8 @@
 #include <mutex>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
-#include <chrono>
 #include "constants.hpp"
+#include "utils.hpp"
 
 class Logger {
 public:

@@ -10,7 +10,12 @@
 #define LOGGER_LEVEL_WARNING    "WARN"
 #define LOGGER_LEVEL_ERROR      "ERR"
 
-#define TIMESTAMP_FORMAT        "%Y-%m-%d %H:%M:%S"
+#define TSTAMP_DATE_TIME_PRETTY "%Y-%m-%d %H:%M:%S"
+#define TSTAMP_DATE_TIME        "%Y%m%d %H%M%S"
+#define TSTAMP_DATE_TIME_       "%Y%m%d_%H%M%S"
+#define TSTAMP_TIME_DATE_PRETTY_"%H:%M:%S_%Y-%m-%d"
+#define TSTAMP_TIME_DATE        "%H%M%S %Y%m%d"
+
 #define VALID_COLORS            "RGBYOP"
 
 #define SOCK_BUFFER_SIZE        32

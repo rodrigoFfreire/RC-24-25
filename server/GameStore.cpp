@@ -1,15 +1,24 @@
 #include "GameStore.hpp"
 
-void formatDateTime(std::stringstream& ss, std::time_t &tstamp, char sep, bool pretty) {
-    std::tm* timeInfo = std::localtime(&tstamp);
-    if (timeInfo) {
-        if (pretty) {
-            ss << std::put_time(timeInfo, "%Y-%m-%d") << sep;
-            ss << std::put_time(timeInfo, "%H:%M:%S");
-        } else {
-            ss << std::put_time(timeInfo, "%Y%m%d") << sep;
-            ss << std::put_time(timeInfo, "%H%M%S");
-        }
+char gameModeToChar(GameMode mode) {
+    switch (mode) {
+    case GameMode::PLAY:
+        return 'P';
+    case GameMode::DEBUG:
+        return 'D';
+    default:
+        throw InvalidGameModeException();
+    }
+}
+
+GameMode charToGameMode(const char c) {
+    switch (c) {
+    case 'P':
+        return GameMode::PLAY;
+    case 'D':
+        return GameMode::DEBUG;
+    default:
+        throw InvalidGameModeException();
     }
 }
 
@@ -24,8 +33,8 @@ Attempt::Attempt(std::string& att) : blacks(0), whites(0), time(0) {
     stream >> time;
 }
 
-std::string Attempt::create(std::string &att, uint blacks, uint whites, std::time_t time) {
-    std::stringstream att_ss;
+std::string Attempt::create(std::string &att, uint blacks, uint whites, time_t time) {
+    std::ostringstream att_ss;
     att_ss << "T: " << att << ' ' << blacks << ' ' << whites << ' ' << time << '\n';
 
     return att_ss.str();
@@ -45,17 +54,7 @@ void ActiveGame::parseHeader(std::ifstream &file) {
     stream >> time_start;
     stream >> tstamp_start;
 
-    switch (mode_char) {
-    case 'P':
-        mode = GameMode::PLAY;
-        break;
-    case 'D':
-        mode = GameMode::DEBUG;
-        break;
-    default:
-        throw InvalidGameModeException();
-        break;
-    }
+    mode = charToGameMode(mode_char);
 }
 
 uint ActiveGame::parseAttempts(std::ifstream &file, std::string& att, std::string& last_att, bool& dup) {
@@ -74,22 +73,14 @@ uint ActiveGame::parseAttempts(std::ifstream &file, std::string& att, std::strin
     return atts;
 }
 
-std::string ActiveGame::create(std::string &plid, uint playTime, GameMode mode, std::time_t &cmd_tstamp, std::string& key) {
-    std::stringstream header_ss;
+std::string ActiveGame::create(std::string &plid, uint playTime, GameMode mode, time_t &cmd_tstamp, std::string& key) {
+    std::ostringstream header_ss;
+
     header_ss << plid << ' ';
-    switch (mode) {
-    case PLAY:
-        header_ss << "P ";
-        break;
-    case DEBUG:
-        header_ss << "D ";
-        break;
-    default:
-        throw InvalidGameModeException();
-    }
+    header_ss << gameModeToChar(mode);
     header_ss << key << ' ';
     header_ss << playTime << ' ';
-    formatDateTime(header_ss, cmd_tstamp, ' ', true);
+    formatTimestamp(header_ss, &cmd_tstamp, TSTAMP_DATE_TIME_PRETTY);
     header_ss << ' ' << cmd_tstamp << '\n';
 
     return header_ss.str();
@@ -139,18 +130,30 @@ void GameStore::calculateAttempt(std::string &key, std::string &att, uint &white
     }
 }
 
-void GameStore::saveGameScore(std::string &plid, std::time_t &win_tstamp, uint used_atts, uint used_time) {
-    std::stringstream score_fname;
-    uint score = 3730 + (((MAX_GUESSES - used_atts * used_atts) * 537.5) / MAX_GUESSES) + 
-                        (((PLAY_TIME_MAX - used_time) * 800) / PLAY_TIME_MAX);
+void GameStore::saveGameScore(std::string &plid, std::string& key, GameMode mode, time_t &win_tstamp, uint used_atts, uint used_time) {
+    std::ostringstream score_fname;
+    std::ostringstream score_header;
+    uint score = 701 + ((MAX_GUESSES - used_atts * used_atts) * 100) / MAX_GUESSES + ((PLAY_TIME_MAX - used_time) * 211) / PLAY_TIME_MAX;
 
     score_fname << score << '_' << plid << '_';
-    formatDateTime(score_fname, win_tstamp, '_', true);
+    formatTimestamp(score_fname, &win_tstamp, TSTAMP_TIME_DATE_PRETTY_);
     score_fname << ".txt";
+
+    score_header << score << ' ' << plid << ' ' << key << ' ';
+    score_header << used_atts << ' ' << gameModeToChar(mode) << '\n';
 
     fs::path score_path = storeDir / "SCORES" / score_fname.str();
     std::ofstream file(score_path);
-    file.close();
+    if (!file.is_open()) {
+        throw OpenFileError();
+    }
+
+    try {
+        file << score_header.str();
+        file.close();
+    } catch (const std::exception& e) {
+        throw WriteFileError();
+    }
 }
 
 char GameStore::endingToStr(Endings ending) {
@@ -172,7 +175,7 @@ GameStore::GameStore(std::string &dir) {
     storeDir = fs::read_symlink("/proc/self/exe").parent_path() / dir;
 }
 
-int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp, std::string* revealed_key) {
+int GameStore::updateGameTime(std::string& plid, time_t& cmd_tstamp, std::string* revealed_key) {
     std::string game_fname = "GAME_" + plid + ".txt";
     fs::path game_path = storeDir / "GAMES" / game_fname;
 
@@ -191,7 +194,7 @@ int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp, std::s
         int remaining_time = static_cast<int>(cmd_tstamp) - game.tstamp_start;
 
         if (remaining_time >= static_cast<int>(game.playTime)) {
-            std::time_t end_tstamp = cmd_tstamp + static_cast<std::time_t>(game.playTime);
+            time_t end_tstamp = cmd_tstamp + static_cast<time_t>(game.playTime);
             if (revealed_key != nullptr) {
                 *revealed_key = game.key;
             }
@@ -206,7 +209,7 @@ int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp, std::s
     }
 }
 
-std::string GameStore::createGame(std::string& plid, uint playTime, std::time_t& cmd_tstamp, std::string* key) {
+std::string GameStore::createGame(std::string& plid, uint playTime, time_t& cmd_tstamp, std::string* key) {
     if (updateGameTime(plid, cmd_tstamp, nullptr) > 0) {
         throw OngoingGameException();
     }
@@ -239,7 +242,7 @@ std::string GameStore::createGame(std::string& plid, uint playTime, std::time_t&
     return new_key;
 }
 
-std::string GameStore::quitGame(std::string &plid, std::time_t &cmd_tstamp) {
+std::string GameStore::quitGame(std::string &plid, time_t &cmd_tstamp) {
     if (updateGameTime(plid, cmd_tstamp, nullptr) < 0) {
         throw UncontextualizedGameException();
     }
@@ -265,7 +268,7 @@ std::string GameStore::quitGame(std::string &plid, std::time_t &cmd_tstamp) {
     return game.key;
 }
 
-uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &blacks, uint &whites, std::time_t& cmd_tstamp, std::string& real_key) {
+uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &blacks, uint &whites, time_t& cmd_tstamp, std::string& real_key) {
     int err = updateGameTime(plid, cmd_tstamp, &real_key);
     if (err == -1) {
         throw UncontextualizedGameException();
@@ -306,7 +309,7 @@ uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &b
         throw DuplicateTrialException();
     }
 
-    std::time_t used_time = cmd_tstamp - game.tstamp_start;
+    time_t used_time = cmd_tstamp - game.tstamp_start;
     calculateAttempt(game.key, att, whites, blacks);
 
     std::ofstream o_file(game_path, std::ios::app);
@@ -323,15 +326,15 @@ uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &b
         throw ExceededMaxTrialsException();
     } else if (blacks == SECRET_KEY_LEN) {
         endGame(plid, Endings::WIN, cmd_tstamp, o_file, used_time);
-        saveGameScore(plid, cmd_tstamp, num_attempts + 1, used_time);
+        saveGameScore(plid, game.key, game.mode, cmd_tstamp, num_attempts + 1, used_time);
     }
 
     return ++num_attempts;
 }
 
-void GameStore::endGame(std::string& plid, Endings reason, std::time_t& tstamp, std::ofstream& file, int used_time) {
-    std::stringstream ss;
-    formatDateTime(ss, tstamp, ' ', true);
+void GameStore::endGame(std::string& plid, Endings reason, time_t& tstamp, std::ofstream& file, int used_time) {
+    std::ostringstream ss;
+    formatTimestamp(ss, &tstamp, TSTAMP_DATE_TIME_PRETTY);
     ss << ' ' << used_time << '\n';
 
     file << ss.str();
@@ -340,8 +343,8 @@ void GameStore::endGame(std::string& plid, Endings reason, std::time_t& tstamp, 
     std::string game_fname = "GAME_" + plid + ".txt";
     fs::path game_path = storeDir / "GAMES" / game_fname;
 
-    std::stringstream finished_fname;
-    formatDateTime(finished_fname, tstamp, '_', false);
+    std::ostringstream finished_fname;
+    formatTimestamp(finished_fname, &tstamp, TSTAMP_DATE_TIME_);
     finished_fname << '_' << endingToStr(reason) << ".txt";
 
     fs::path finished_path = storeDir / "GAMES" / plid / finished_fname.str();

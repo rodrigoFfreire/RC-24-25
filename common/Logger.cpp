@@ -3,12 +3,10 @@
 std::string Logger::format(Severity level, const std::string &msg) {
     std::ostringstream ss;
 
-    auto now = std::chrono::system_clock::now();
-    time_t time = std::chrono::system_clock::to_time_t(now);
-
-    ss << "[" << std::put_time(std::localtime(&time), TIMESTAMP_FORMAT) << "] ";
+    ss << "[";
+    formatTimestamp(ss, nullptr, TSTAMP_DATE_TIME_PRETTY);
+    ss << "] ";
     ss << "[" << severityToStr(level) << "] ";
-    //ss << "[" << entity << "]: ";
     ss << msg;
 
     return ss.str();

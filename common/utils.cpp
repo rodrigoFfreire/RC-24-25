@@ -47,3 +47,19 @@ ssize_t safe_write(int fd, const char* buffer, size_t n) {
 
   return completed_bytes;
 }
+
+void formatTimestamp(std::ostringstream& ss, const time_t* tstamp, const std::string &format) {
+  std::tm* timeInfo;
+  
+  if (tstamp == nullptr) {
+    auto now = std::chrono::system_clock::now();
+    time_t time_now = std::chrono::system_clock::to_time_t(now);
+    timeInfo = std::localtime(&time_now);
+  } else {
+    timeInfo = std::localtime(tstamp);
+  }
+
+  if (timeInfo) {
+    ss << std::put_time(timeInfo, format.c_str());
+  }
+}

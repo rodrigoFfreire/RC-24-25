@@ -7,18 +7,19 @@
 #include <array>
 #include <unordered_map>
 #include <sstream>
-#include <chrono>
 #include <random>
-#include <ctime>
 #include "../common/constants.hpp"
 #include "exceptions/ServerExceptions.hpp"
 #include "exceptions/GameExceptions.hpp"
+#include "../common/utils.hpp"
 
 namespace fs = std::filesystem;
 
-void formatDateTime(std::stringstream& ss, std::time_t &tstamp, char sep, bool pretty);
-
 enum GameMode { PLAY, DEBUG };
+
+char gameModeToChar(GameMode mode);
+
+GameMode charToGameMode(const char c);
 
 class Attempt {
 public:
@@ -65,7 +66,7 @@ private:
     fs::path storeDir;
 
     void calculateAttempt(std::string& key, std::string& att, uint& whites, uint& blacks);
-    void saveGameScore(std::string& plid, std::time_t& win_tstamp, uint used_atts, uint used_time);
+    void saveGameScore(std::string &plid, std::string& key, GameMode mode, std::time_t &win_tstamp, uint used_atts, uint used_time);
     char endingToStr(Endings ending);
 };
 
