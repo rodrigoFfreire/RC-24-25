@@ -26,6 +26,17 @@ GameMode charToGameMode(const char c);
 std::string endingToRepr(Endings ending);
 Endings charToEnding(const char c);
 
+class LeaderboardEntry {
+public:
+    int score;
+    std::string plid;
+    std::string key;
+    uint used_atts;
+    GameMode mode;
+
+    LeaderboardEntry(std::ifstream& file);
+};
+
 class Attempt {
 public:
     std::string att_key;
@@ -73,7 +84,7 @@ public:
     uint attempt(std::string& plid, std::string& key, uint trial, uint& blacks, uint& whites, time_t& cmd_tstamp, std::string& real_key);
     std::string quitGame(std::string& plid, time_t& cmd_tstamp);
     Game::Status getLastGame(std::string& plid, time_t& cmd_tstamp, std::string& output);
-    std::string getScoreboard(time_t& cmd_tstamp);
+    std::string getScoreboard();
 
 private:
     fs::path storeDir;

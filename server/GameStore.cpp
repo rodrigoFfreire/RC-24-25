@@ -364,6 +364,43 @@ Game::Status GameStore::getLastGame(std::string &plid, time_t &cmd_tstamp, std::
     return game.status;
 }
 
+std::string GameStore::getScoreboard() {
+    fs::path scores_path = storeDir / "SCORES";
+    std::vector<fs::path> score_paths;
+
+    std::ostringstream output_ss;
+    output_ss << "\n-------------------- Mastermind Leaderboard - TOP 10 --------------------\n\n";
+    output_ss << "                 SCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
+
+    try {
+        for (const auto& entry : fs::directory_iterator(scores_path)) {
+            if (!entry.is_regular_file() || entry.path().extension() != ".txt") {
+                continue;
+            }
+            score_paths.push_back(entry.path());
+        }
+
+        if (score_paths.empty()) {
+            throw EmptyScoreboardException();
+        }
+
+        std::sort(score_paths.begin(), score_paths.end(), std::greater<>());
+
+        for (size_t i = 0; i < score_paths.size() || i < SCOREBOARD_MAX_ENTRIES; ++i) {
+            std::ifstream file(score_paths[i]);
+            LeaderboardEntry entry(file);
+            file.close();
+
+            output_ss << "             " << i + 1 << " -  " << entry.score << "  " << entry.plid;
+            output_ss << "     " << entry.key << "        " <<  entry.used_atts << "       " << gameModeToRepr(entry.mode) << "\n";
+        }
+    } catch (const std::exception& e) {
+        throw DBFilesystemError();
+    }
+
+    return output_ss.str();
+}
+
 uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &blacks, uint &whites, time_t& cmd_tstamp, std::string& real_key) {
     int err = updateGameTime(plid, cmd_tstamp, &real_key);
     if (err == -1) {
@@ -479,4 +516,16 @@ std::string GameStore::findLastFinishedGame(std::string &plid) {
     }
 
     return filenames[0];
+}
+
+LeaderboardEntry::LeaderboardEntry(std::ifstream& file) {
+    char mode_char;
+
+    file >> score;
+    file >> plid;
+    file >> key;
+    file >> used_atts;
+    file >> mode_char;
+
+    mode = charToGameMode(mode_char);
 }

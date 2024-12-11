@@ -5,6 +5,7 @@
 void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket) {
     ShowTrialsPacket request;
     auto reply = std::make_unique<ReplyShowTrialsPacket>();
+    reply->status = ReplyShowTrialsPacket::NOK;
 
     try {
         time_t now = state.getCommandTime();
@@ -24,7 +25,6 @@ void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>&
             reply->status = ReplyShowTrialsPacket::FIN;
             break;
         default:
-            reply->status = ReplyShowTrialsPacket::NOK;
             break;
         }
 
@@ -44,12 +44,31 @@ void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>&
 }
 
 void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket) {
-    (void)fd; (void)state;
     ShowScoreboardPacket request;
     auto reply = std::make_unique<ReplyShowScoreboardPacket>();
     reply->status = ReplyShowScoreboardPacket::EMPTY;
 
-    request.read(fd);
+    try {
+        time_t now = state.getCommandTime();
+        request.read(fd);
+
+        std::string file_str = state.store.getScoreboard();
+        
+        reply->fname = "TOPSCORES.txt";
+        reply->fsize = file_str.size();
+        reply->fdata = file_str + '\n';
+        reply->status = ReplyShowScoreboardPacket::OK;
+
+        std::stringstream ss;
+        ss << "Sending scoreboard... (" << reply->fsize << " Bytes)\n";
+        state.logger.log(Logger::Severity::INFO, ss.str(), true);
+    } catch (const EmptyScoreboardException& e) {
+        reply->status = ReplyShowScoreboardPacket::EMPTY;
+        state.logger.log(Logger::Severity::INFO, e.what(), true);
+    } catch (const std::exception& e) {
+        reply->status = ReplyShowScoreboardPacket::EMPTY;
+        state.logger.log(Logger::Severity::WARN, e.what(), true);
+    }
 
     replyPacket = std::move(reply);
 }

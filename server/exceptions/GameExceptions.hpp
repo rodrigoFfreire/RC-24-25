@@ -43,6 +43,14 @@ public:
     NeverPlayedException() : CommonException(errorMsg) {};
 };
 
+class EmptyScoreboardException : public CommonException {
+private:
+    const std::string errorMsg = "Scoreboard is still empty...";
+
+public:
+    EmptyScoreboardException() : CommonException(errorMsg) {};
+};
+
 class TimedoutGameException : public CommonException {
 private:
     const std::string errorMsg = "This player has exceeded the maximum play time!";

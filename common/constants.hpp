@@ -34,6 +34,7 @@
 #define PLAYER_ID_LEN               6
 #define PLAY_TIME_MAX               600
 #define MAX_GUESSES                 8
+#define SCOREBOARD_MAX_ENTRIES      3
 
 #define FNAME_MAX                   24
 #define FSIZE_MAX                   2048

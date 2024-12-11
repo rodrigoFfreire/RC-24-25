@@ -113,10 +113,20 @@ void ReplyShowScoreboardPacket::read(int connection_fd) {
     parser.end();
 }
 
-void ReplyShowScoreboardPacket::send(int connection_fd) const
-{
+void ReplyShowScoreboardPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
-    encoded_stream << packetID << ' ' << statusToStr(status) << '\n';
+    encoded_stream << packetID << ' ' << statusToStr(status);
+    switch (status) {
+    case ReplyShowScoreboardPacket::EMPTY:
+        break;
+    case ReplyShowScoreboardPacket::OK:
+        encoded_stream << ' ' << fname << ' ' << fsize << ' ' << fdata;
+        break;
+    default:
+        throw PacketEncodingException();
+    }
+
+    encoded_stream << '\n';
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
