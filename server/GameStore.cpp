@@ -189,7 +189,7 @@ void GameStore::saveGameScore(std::string &plid, std::string& key, GameMode mode
     int score = 701 + ((MAX_GUESSES - used_atts * used_atts) * 100) / MAX_GUESSES + ((PLAY_TIME_MAX - used_time) * 211) / PLAY_TIME_MAX;
 
     score_fname << score << '_' << plid << '_';
-    formatTimestamp(score_fname, &win_tstamp, TSTAMP_TIME_DATE_PRETTY_);
+    formatTimestamp(score_fname, &win_tstamp, TSTAMP_DATE_TIME_PRETTY_);
     score_fname << ".txt";
 
     score_header << score << ' ' << plid << ' ' << key << ' ';
