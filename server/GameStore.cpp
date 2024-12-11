@@ -369,7 +369,7 @@ std::string GameStore::getScoreboard() {
     std::vector<fs::path> score_paths;
 
     std::ostringstream output_ss;
-    output_ss << "\n-------------------- Mastermind Leaderboard - TOP 10 --------------------\n\n";
+    output_ss << "\n-------------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " --------------------\n\n";
     output_ss << "                 SCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
 
     try {
@@ -386,7 +386,7 @@ std::string GameStore::getScoreboard() {
 
         std::sort(score_paths.begin(), score_paths.end(), std::greater<>());
 
-        for (size_t i = 0; i < score_paths.size() || i < SCOREBOARD_MAX_ENTRIES; ++i) {
+        for (size_t i = 0; i < score_paths.size() && i < SCOREBOARD_MAX_ENTRIES; ++i) {
             std::ifstream file(score_paths[i]);
             LeaderboardEntry entry(file);
             file.close();
@@ -394,6 +394,8 @@ std::string GameStore::getScoreboard() {
             output_ss << "             " << i + 1 << " -  " << entry.score << "  " << entry.plid;
             output_ss << "     " << entry.key << "        " <<  entry.used_atts << "       " << gameModeToRepr(entry.mode) << "\n";
         }
+    } catch (const EmptyScoreboardException& e) {
+        throw EmptyScoreboardException();
     } catch (const std::exception& e) {
         throw DBFilesystemError();
     }

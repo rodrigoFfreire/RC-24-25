@@ -40,7 +40,7 @@ private:
     static constexpr const char* errorMsg = "A filesystem operation in the database has failed! ";
 
 public:
-    DBFilesystemError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+    DBFilesystemError() : CommonError(std::string(errorMsg)) {};
 };
 
 

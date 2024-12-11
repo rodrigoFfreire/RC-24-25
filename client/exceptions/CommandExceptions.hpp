@@ -75,4 +75,12 @@ public:
     UncontextualizedException() : CommonException(errorMsg) {};
 };
 
+class EmptyScoreboardException : public CommonException {
+private:
+    const std::string errorMsg = "The scoreboard is still empty...";
+
+public:
+    EmptyScoreboardException() : CommonException(errorMsg) {};
+};
+
 #endif

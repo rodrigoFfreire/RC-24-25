@@ -36,7 +36,9 @@ void showScoreboardHandler(GameState& state, TcpSocket& socket) {
         switch (reply.status) {
         case ReplyShowScoreboardPacket::OK:
             state.saveFile(reply.fname, reply.fdata);
+            break;
         case ReplyShowScoreboardPacket::EMPTY:
+            throw EmptyScoreboardException();
             break;
         default:
             throw BadCommandException();
