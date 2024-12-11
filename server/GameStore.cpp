@@ -356,8 +356,8 @@ Game::Status GameStore::getLastGame(std::string &plid, time_t &cmd_tstamp, std::
     if (game.status == Game::Status::ACT) {
         output_ss << "\n    --- " << (game.playTime - (cmd_tstamp - game.tstamp_start)) << " seconds remaining ---\n";
     } else {
-        output_ss << "\n    --- Game terminated: " << endingToRepr(game.ending) << " at " << game.date_end << ' ' << game.time_end;
-        output_ss << ", Duration: " << game.usedTime << "s\n";
+        output_ss << "\nGame terminated: " << endingToRepr(game.ending) << " at " << game.date_end << ' ' << game.time_end;
+        output_ss << "\nDuration: " << game.usedTime << " seconds\n";
     }
 
     output = output_ss.str();
