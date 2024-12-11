@@ -59,6 +59,8 @@ void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream&
 
 void buildTryPacket(GameState& state, std::stringstream& command_stream, TryPacket& packet) {
     std::string valid_colors = VALID_COLORS;
+    packet.key.resize(SECRET_KEY_LEN, '\0');
+    
     for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
         char c;
         command_stream >> c;
@@ -207,7 +209,7 @@ void debugGameHandler(GameState& state, UdpSocket& socket, std::stringstream& co
         reply.decode(responseStream);
         switch (reply.status) {
         case ReplyDebugPacket::OK:
-            state.startGame(request.playerID, request.key, true);
+            state.startGame(request.playerID, &request.key, true);
             break;
         case ReplyDebugPacket::NOK:
             throw PendingGameException();

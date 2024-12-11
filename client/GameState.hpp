@@ -19,26 +19,27 @@ private:
     bool _unicode;
     unsigned int plid;
     unsigned int trial;
-    std::vector<std::array<char, SECRET_KEY_LEN + 1>> guesses;
+    std::vector<std::string> guesses;
     std::vector<std::array<unsigned int, 2>> feedback;
-    char _key[SECRET_KEY_LEN + 1] = {0};
+    std::string _key;
 
     void registerColorMap();
 
 public:
     GameState(bool unicode) : _isGame(false), _finished(false), _unicode(unicode) {
+        _key.resize(SECRET_KEY_LEN, '\0');
         registerColorMap();
     };
 
     enum Events { LOST_TIME, LOST_MAXTRIALS, WON, QUIT };
 
     bool isGame() {return _isGame;};
-    void startGame(unsigned int id, char *key, bool debug);
-    void endGame(char *key, Events event);
+    void startGame(unsigned int id, std::string* key, bool debug);
+    void endGame(std::string& key, Events event);
     unsigned int getPlid();
     unsigned int newAttempt();
     unsigned int getTrial();
-    void saveAttempt(char *att, unsigned int b, unsigned int w);
+    void saveAttempt(std::string& att, unsigned int b, unsigned int w);
     void saveFile(std::string& fname, std::string& fdata);
     void printState();
 };

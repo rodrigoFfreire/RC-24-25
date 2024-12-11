@@ -24,26 +24,26 @@ void GameState::registerColorMap() {
     }
 }
 
-void GameState::startGame(unsigned int id, char *key, bool debug) {
+void GameState::startGame(unsigned int id, std::string* key, bool debug) {
     plid = id;
     trial = 1;
     _isGame = true;
     _finished = false;
     _debug = debug;
-
-    memset(_key, 0, SECRET_KEY_LEN + 1);
+    
+    _key.clear();
     guesses.clear();
     feedback.clear();
 
     if (key != nullptr) {
-        strncpy(_key, key, SECRET_KEY_LEN);
+        _key = *key;
     }
 
     printState();
 }
 
-void GameState::endGame(char *key, Events event) {
-    strncpy(_key, key, SECRET_KEY_LEN);
+void GameState::endGame(std::string& key, Events event) {
+    _key = key;
 
     _finished = true;
     printState();
@@ -89,10 +89,8 @@ unsigned int GameState::getTrial() {
     return trial;
 }
 
-void GameState::saveAttempt(char *att, unsigned int b, unsigned int w) {
-    std::array<char, SECRET_KEY_LEN + 1> entry({0});
-    std::copy(att, att + SECRET_KEY_LEN, entry.begin());
-    guesses.push_back(entry);
+void GameState::saveAttempt(std::string& att, unsigned int b, unsigned int w) {
+    guesses.push_back(att);
     feedback.push_back({b, w});
 }
 
