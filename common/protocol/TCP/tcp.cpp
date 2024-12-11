@@ -2,6 +2,8 @@
 #include <iostream>
 
 void ShowTrialsPacket::read(int connection_fd) {
+    playerID.resize(PLAYER_ID_LEN, '\0');
+
     TcpParser parser(connection_fd);
     
     parser.next();
@@ -11,8 +13,7 @@ void ShowTrialsPacket::read(int connection_fd) {
 
 void ShowTrialsPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID << '\n';
+    encoded_stream << packetID << ' ' << playerID << '\n';
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
@@ -51,7 +52,19 @@ void ReplyShowTrialsPacket::read(int connection_fd) {
 
 void ReplyShowTrialsPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
-    encoded_stream << packetID << ' ' << statusToStr(status) << '\n';
+    encoded_stream << packetID << ' ' << statusToStr(status);
+    switch (status) {
+    case ReplyShowTrialsPacket::NOK:
+        break;
+    case ReplyShowTrialsPacket::FIN:
+    case ReplyShowTrialsPacket::ACT:
+        encoded_stream << ' ' << fname << ' ' << fsize << ' ' << fdata;
+        break;
+    default:
+        throw PacketEncodingException();
+    }
+
+    encoded_stream << '\n';
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());

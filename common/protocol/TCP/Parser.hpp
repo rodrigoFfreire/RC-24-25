@@ -27,7 +27,7 @@ public:
     std::string parseStatus();
     std::string parseFileName();
     std::string parseFile(unsigned short file_size);
-    unsigned int parsePlayerID();
+    std::string parsePlayerID();
     unsigned short parseFileSize();
 };
 

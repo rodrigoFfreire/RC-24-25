@@ -84,11 +84,14 @@ std::string TcpParser::parseStatus() {
     return parseFixedString(STATUS_CODE_LEN);
 }
 
-unsigned int TcpParser::parsePlayerID() {
+std::string TcpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLAYER_ID_LEN);
     try {
         int n = std::stoul(plID_str);
-        return static_cast<unsigned int>(n);
+        if (n < 0 || n > PLID_MAX)
+            throw InvalidPacketException();
+
+        return plID_str;
     } catch (const std::invalid_argument& e) {
         throw InvalidPacketException();
     }

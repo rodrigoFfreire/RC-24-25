@@ -13,7 +13,7 @@ public:
 class ShowTrialsPacket : public TcpPacket {
 public:
     static constexpr const char* packetID = "STR";
-    unsigned int playerID;
+    std::string playerID;
 
     void read(int connection_fd) override;
     void send(int connection_fd) const override;
