@@ -39,7 +39,7 @@ void tryHandler(std::stringstream &packetStream, Server &state, std::unique_ptr<
     std::string real_key;
 
     try {
-        std::time_t now = state.getCommandTime();
+        time_t now = state.getCommandTime();
         request.decode(packetStream);
 
         std::ostringstream oss;

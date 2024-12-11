@@ -19,12 +19,28 @@ public:
     InvalidGameModeException() : CommonException(errorMsg) {};
 };
 
+class InvalidEndingException : public CommonException {
+private:
+    const std::string errorMsg = "That game ending is not recognized";
+
+public:
+    InvalidEndingException() : CommonException(errorMsg) {};
+};
+
 class UncontextualizedGameException : public CommonException {
 private:
     const std::string errorMsg = "This player has no ongoing game!";
 
 public:
     UncontextualizedGameException() : CommonException(errorMsg) {};
+};
+
+class NeverPlayedException : public CommonException {
+private:
+    const std::string errorMsg = "This player has no registered games!";
+
+public:
+    NeverPlayedException() : CommonException(errorMsg) {};
 };
 
 class TimedoutGameException : public CommonException {
