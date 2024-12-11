@@ -13,6 +13,9 @@ int main(int argc, char **argv) {
         register_signal_handler();
 
         Server server(config, logger);
+        server.setupUdp();
+        server.setupTcp();
+
         std::thread udpThread(&Server::runUdp, &server);
         std::thread tcpThread(&Server::runTcp, &server);
 

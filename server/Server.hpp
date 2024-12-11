@@ -23,8 +23,6 @@ private:
     std::unordered_map<std::string, HandlerTcpFunc> tcp_handlers;
     WorkerPool tcpPool;
 
-    void setupUdp();
-    void setupTcp();
     void registerCommands();
     void handleUdpCommand(std::string& packetId, std::stringstream& packetStream, std::unique_ptr<UdpPacket>& replyPacket);
     void handleTcpCommand(std::string& packetId, const int& conn_fd, std::unique_ptr<TcpPacket>& replyPacket);
@@ -34,6 +32,8 @@ public:
     GameStore store;
 
     Server(Config& config, Logger& logger);
+    void setupUdp();
+    void setupTcp();
     void runUdp();
     void runTcp();
     void handleTcpConnection(const int conn_fd); // Worker function

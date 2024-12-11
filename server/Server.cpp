@@ -74,7 +74,6 @@ void Server::handleTcpCommand(std::string &packetId, const int& conn_fd, std::un
 }
 
 void Server::runUdp() {
-    setupUdp();
     while (!terminate_flag) {
         struct sockaddr_in client_addr;
         try {
@@ -135,7 +134,6 @@ void Server::runUdp() {
 }
 
 void Server::runTcp() {
-    setupTcp();
     while (!terminate_flag) {
         struct sockaddr_in client_addr;
         int conn_fd = -1;
