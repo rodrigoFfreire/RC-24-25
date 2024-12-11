@@ -1,5 +1,100 @@
 #include "GameStore.hpp"
 
+void formatDateTime(std::stringstream& ss, std::time_t &tstamp, char sep, bool pretty) {
+    std::tm* timeInfo = std::localtime(&tstamp);
+    if (timeInfo) {
+        if (pretty) {
+            ss << std::put_time(timeInfo, "%Y-%m-%d") << sep;
+            ss << std::put_time(timeInfo, "%H:%M:%S");
+        } else {
+            ss << std::put_time(timeInfo, "%Y%m%d") << sep;
+            ss << std::put_time(timeInfo, "%H%M%S");
+        }
+    }
+}
+
+Attempt::Attempt(std::string& att) : blacks(0), whites(0), time(0) {
+    std::string prefix;
+    std::istringstream stream(att);
+
+    stream >> prefix;   // "T:""
+    stream >> att_key;
+    stream >> blacks;
+    stream >> whites;
+    stream >> time;
+}
+
+std::string Attempt::create(std::string &att, uint blacks, uint whites, std::time_t time) {
+    std::stringstream att_ss;
+    att_ss << "T: " << att << ' ' << blacks << ' ' << whites << ' ' << time << '\n';
+
+    return att_ss.str();
+};
+
+void ActiveGame::parseHeader(std::ifstream &file) {
+    std::string header;
+    std::getline(file, header);
+    std::istringstream stream(header);
+    char mode_char;
+
+    stream >> plid;
+    stream >> mode_char;
+    stream >> key;
+    stream >> playTime;
+    stream >> date_start;
+    stream >> time_start;
+    stream >> tstamp_start;
+
+    switch (mode_char) {
+    case 'P':
+        mode = GameMode::PLAY;
+        break;
+    case 'D':
+        mode = GameMode::DEBUG;
+        break;
+    default:
+        throw InvalidGameModeException();
+        break;
+    }
+}
+
+uint ActiveGame::parseAttempts(std::ifstream &file, std::string& att, std::string& last_att, bool& dup) {
+    std::string attempt_line;
+    uint atts = 0;
+    while (std::getline(file, attempt_line)) {
+        if (attempt_line[0] == 'T') {
+            Attempt attempt(attempt_line);
+            atts++;
+            if (!att.compare(attempt.att_key)) {
+                dup = true;
+            }
+            last_att = attempt.att_key;
+        }
+    }
+    return atts;
+}
+
+std::string ActiveGame::create(std::string &plid, uint playTime, GameMode mode, std::time_t &cmd_tstamp, std::string& key) {
+    std::stringstream header_ss;
+    header_ss << plid << ' ';
+    switch (mode) {
+    case PLAY:
+        header_ss << "P ";
+        break;
+    case DEBUG:
+        header_ss << "D ";
+        break;
+    default:
+        throw InvalidGameModeException();
+    }
+    header_ss << key << ' ';
+    header_ss << playTime << ' ';
+    formatDateTime(header_ss, cmd_tstamp, ' ', true);
+    header_ss << ' ' << cmd_tstamp << '\n';
+
+    return header_ss.str();
+}
+
 std::string GameStore::generateKey() {
     std::string key(SECRET_KEY_LEN, '\0');
     size_t valid_chars_len = strlen(VALID_COLORS);
@@ -19,21 +114,43 @@ std::string GameStore::generateKey() {
     }
 
     urandom.close();
-
     return key;
 }
 
-void GameStore::formatDateTime(std::stringstream& ss, std::time_t &tstamp, char sep, bool pretty) {
-    std::tm* timeInfo = std::localtime(&tstamp);
-    if (timeInfo) {
-        if (pretty) {
-            ss << std::put_time(timeInfo, "%Y-%m-%d") << sep;
-            ss << std::put_time(timeInfo, "%H:%M:%S") << sep;
+void GameStore::calculateAttempt(std::string &key, std::string &att, uint &whites, uint &blacks) {
+    const std::string valid_colors = VALID_COLORS;
+    std::array<int, strlen(VALID_COLORS)> key_count({0});
+    std::array<int, strlen(VALID_COLORS)> attempt_count({0});
+
+    // First pass: Count black pegs and build frequency arrays
+    for (int i = 0; i < SECRET_KEY_LEN; ++i) {
+        if (key[i] == att[i]) {
+            blacks++;
         } else {
-            ss << std::put_time(timeInfo, "%Y%m%d") << sep;
-            ss << std::put_time(timeInfo, "%H%M%S") << sep;
+            // Increment the frequency of unmatched colors
+            key_count[valid_colors.find(key[i])]++;
+            attempt_count[valid_colors.find(att[i])]++;
         }
     }
+
+    // Second pass: Count white pegs
+    for (size_t i = 0; i < valid_colors.size(); i++) {
+        whites += (key_count[i] < attempt_count[i]) ? key_count[i] : attempt_count[i];
+    }
+}
+
+void GameStore::saveGameScore(std::string &plid, std::time_t &win_tstamp, uint used_atts, uint used_time) {
+    std::stringstream score_fname;
+    uint score = 3730 + (((MAX_GUESSES - used_atts * used_atts) * 537.5) / MAX_GUESSES) + 
+                        (((PLAY_TIME_MAX - used_time) * 800) / PLAY_TIME_MAX);
+
+    score_fname << score << '_' << plid << '_';
+    formatDateTime(score_fname, win_tstamp, '_', true);
+    score_fname << ".txt";
+
+    fs::path score_path = storeDir / "SCORES" / score_fname.str();
+    std::ofstream file(score_path);
+    file.close();
 }
 
 char GameStore::endingToStr(Endings ending) {
@@ -55,37 +172,33 @@ GameStore::GameStore(std::string &dir) {
     storeDir = fs::read_symlink("/proc/self/exe").parent_path() / dir;
 }
 
-int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp) {
-    std::stringstream ss;
-    ss << plid;
-
-    std::string game_fname = "GAME_" + ss.str() + ".txt";
+int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp, std::string* revealed_key) {
+    std::string game_fname = "GAME_" + plid + ".txt";
     fs::path game_path = storeDir / "GAMES" / game_fname;
 
     if (!fs::exists(game_path)) return -1;
     
-    std::ifstream i_file(game_path);
-    if (!i_file.is_open()) {
+    std::ifstream file(game_path);
+    if (!file.is_open()) {
         throw OpenFileError();
     }
 
     try {
-        std::string header;
-        std::getline(i_file, header);
-        i_file.close();
+        ActiveGame game;
+        game.parseHeader(file);
+        file.close();
 
-        const char* buffer = header.c_str();
-        int start_tstamp;
-        int play_time;
-        int remaining_time;
+        int remaining_time = static_cast<int>(cmd_tstamp) - game.tstamp_start;
 
-        sscanf(buffer, "%*d %*c %*s %d %*s %*s %d", &play_time, &start_tstamp);
-        remaining_time = cmd_tstamp - static_cast<std::time_t>(start_tstamp);
+        if (remaining_time >= static_cast<int>(game.playTime)) {
+            std::time_t end_tstamp = cmd_tstamp + static_cast<std::time_t>(game.playTime);
+            if (revealed_key != nullptr) {
+                *revealed_key = game.key;
+            }
 
-        if (remaining_time >= play_time) {
             std::ofstream o_file(game_path, std::ios::app);
-            endGame(plid, Endings::TIMEOUT, cmd_tstamp, o_file, play_time);
-            return -1;
+            endGame(plid, Endings::TIMEOUT, end_tstamp, o_file, game.playTime);
+            return -2;
         }
         return remaining_time;
     } catch (const std::exception& e) {
@@ -93,52 +206,133 @@ int GameStore::updateGameTime(std::string& plid, std::time_t& cmd_tstamp) {
     }
 }
 
-std::string GameStore::createGame(std::string& plid, unsigned short playTime, GameMode gamemode, std::time_t& cmd_tstamp) {
-    try {
-        if (updateGameTime(plid, cmd_tstamp) != -1) {
-            throw OngoingGameException();
-        }
-    } catch (const std::exception& e) {
+std::string GameStore::createGame(std::string& plid, uint playTime, std::time_t& cmd_tstamp, std::string* key) {
+    if (updateGameTime(plid, cmd_tstamp, nullptr) > 0) {
         throw OngoingGameException();
     }
 
-    std::stringstream game_header;
-    std::string key = generateKey();
-
-    game_header << plid << ' ';
-    switch (gamemode) {
-    case PLAY:
-        game_header << "P ";
-        break;
-    case DEBUG:
-        game_header << "D ";
-        break;
-    default:
-        throw InvalidGameModeException();
+    std::string new_key;
+    GameMode mode;
+    if (key == nullptr) {
+        new_key = generateKey();
+        mode = GameMode::PLAY;
+    } else {
+        new_key = *key;
+        mode = GameMode::DEBUG;
     }
 
-    game_header << key << ' ';
-    game_header << playTime << ' ';
-    formatDateTime(game_header, cmd_tstamp, ' ', true);
-    game_header << cmd_tstamp << '\n';
+    std::string game_header = ActiveGame::create(plid, playTime, mode, cmd_tstamp, new_key);
 
     std::string game_fname = "GAME_" + plid + ".txt";
-    fs::path game_path = storeDir / "GAMES" / game_fname;
-
-    std::ofstream file(game_path, std::ios::trunc);
+    std::ofstream file(storeDir / "GAMES" / game_fname, std::ios::trunc);
     if (!file.is_open()) {
         throw OpenFileError();
     }
 
-    file << game_header.str();
+    try {
+        file << game_header;
+        file.close();
+    } catch (const std::exception& e) {
+        throw WriteFileError();
+    }
 
-    return key;
+    return new_key;
+}
+
+std::string GameStore::quitGame(std::string &plid, std::time_t &cmd_tstamp) {
+    if (updateGameTime(plid, cmd_tstamp, nullptr) < 0) {
+        throw UncontextualizedGameException();
+    }
+
+    std::string game_fname = "GAME_" + plid + ".txt";
+    fs::path game_path = storeDir / "GAMES" / game_fname;
+
+    std::ifstream i_file(game_path);
+    if (!i_file.is_open()) {
+        throw OpenFileError();
+    }
+
+    ActiveGame game;
+    game.parseHeader(i_file);
+
+    std::ofstream o_file(game_path, std::ios::app);
+    if (!o_file.is_open()) {
+        throw OpenFileError();
+    }
+
+    endGame(plid, Endings::QUIT, cmd_tstamp, o_file, cmd_tstamp - game.tstamp_start);
+
+    return game.key;
+}
+
+uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &blacks, uint &whites, std::time_t& cmd_tstamp, std::string& real_key) {
+    int err = updateGameTime(plid, cmd_tstamp, &real_key);
+    if (err == -1) {
+        throw UncontextualizedGameException();
+    } else if (err == -2) {
+        throw TimedoutGameException();
+    }
+
+    std::string game_fname = "GAME_" + plid + ".txt";
+    fs::path game_path = storeDir / "GAMES" / game_fname;
+    
+    std::ifstream i_file(game_path, std::ios::in | std::ios::out);
+    if (!i_file.is_open()) {
+        throw OpenFileError();
+    }
+
+    bool isDup;
+    std::string last_att;
+    uint num_attempts = 0;
+    ActiveGame game;
+
+    try {
+        game.parseHeader(i_file);
+
+        num_attempts = game.parseAttempts(i_file, att, last_att, isDup);
+        i_file.close();
+    } catch (const std::exception& e) {
+        throw ReadFileError();
+    }
+
+    if (trial == num_attempts && !att.compare(last_att)) {
+        calculateAttempt(game.key, att, whites, blacks);
+        return num_attempts; // Client sent the same trial
+    } 
+    else if ((trial == num_attempts && att.compare(last_att)) ||
+                trial != num_attempts + 1) {
+        throw InvalidTrialException();
+    } else if (trial == num_attempts + 1 && isDup) {
+        throw DuplicateTrialException();
+    }
+
+    std::time_t used_time = cmd_tstamp - game.tstamp_start;
+    calculateAttempt(game.key, att, whites, blacks);
+
+    std::ofstream o_file(game_path, std::ios::app);
+
+    try {
+        o_file << Attempt::create(att, blacks, whites, used_time);
+    } catch (const std::exception& e) {
+        throw WriteFileError();
+    }
+
+    if (num_attempts == MAX_GUESSES - 1 && blacks != SECRET_KEY_LEN) {
+        endGame(plid, Endings::LOST, cmd_tstamp, o_file, used_time);
+        real_key = game.key;
+        throw ExceededMaxTrialsException();
+    } else if (blacks == SECRET_KEY_LEN) {
+        endGame(plid, Endings::WIN, cmd_tstamp, o_file, used_time);
+        saveGameScore(plid, cmd_tstamp, num_attempts + 1, used_time);
+    }
+
+    return ++num_attempts;
 }
 
 void GameStore::endGame(std::string& plid, Endings reason, std::time_t& tstamp, std::ofstream& file, int used_time) {
     std::stringstream ss;
     formatDateTime(ss, tstamp, ' ', true);
-    ss << used_time << '\n';
+    ss << ' ' << used_time << '\n';
 
     file << ss.str();
     file.close();
@@ -148,7 +342,7 @@ void GameStore::endGame(std::string& plid, Endings reason, std::time_t& tstamp, 
 
     std::stringstream finished_fname;
     formatDateTime(finished_fname, tstamp, '_', false);
-    finished_fname << endingToStr(reason) << ".txt";
+    finished_fname << '_' << endingToStr(reason) << ".txt";
 
     fs::path finished_path = storeDir / "GAMES" / plid / finished_fname.str();
 
