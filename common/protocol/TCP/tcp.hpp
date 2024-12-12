@@ -8,6 +8,7 @@ class TcpPacket {
 public:
     virtual void read(int connection_fd) = 0;
     virtual void send(int connection_fd) const = 0;
+    virtual ~TcpPacket() = default;
 };
 
 class ShowTrialsPacket : public TcpPacket {

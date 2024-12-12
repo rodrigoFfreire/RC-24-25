@@ -7,6 +7,7 @@ class UdpPacket {
 public:
     virtual void decode(std::stringstream& packetStream) = 0;
     virtual std::string encode() const = 0;
+    virtual ~UdpPacket() = default;
 };
 
 class StartNewGamePacket : public UdpPacket {

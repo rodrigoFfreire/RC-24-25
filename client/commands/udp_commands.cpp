@@ -92,7 +92,7 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
         reply.decode(responseStream);
 
         switch (reply.status) {
-        case ReplyStartGamePacket::OK:
+        case ReplyTryPacket::OK:
             if (reply.trial < request.trial)
                 break;
             state.saveAttempt(request.key, reply.blacks, reply.whites);

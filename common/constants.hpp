@@ -15,6 +15,7 @@
 #define TSTAMP_DATE_TIME_           "%Y%m%d_%H%M%S"
 
 #define VALID_COLORS                "RGBYOP"
+#define VALID_COLORS_LEN            6
 
 #define SOCK_BUFFER_SIZE            32
 #define SERVER_RECV_TIMEOUT         5

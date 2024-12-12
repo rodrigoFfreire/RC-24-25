@@ -162,8 +162,9 @@ std::string GameStore::generateKey() {
 
 void GameStore::calculateAttempt(std::string &key, std::string &att, uint &whites, uint &blacks) {
     const std::string valid_colors = VALID_COLORS;
-    std::array<int, strlen(VALID_COLORS)> key_count({0});
-    std::array<int, strlen(VALID_COLORS)> attempt_count({0});
+
+    std::array<int, VALID_COLORS_LEN> key_count({0});
+    std::array<int, VALID_COLORS_LEN> attempt_count({0});
 
     // First pass: Count black pegs and build frequency arrays
     for (int i = 0; i < SECRET_KEY_LEN; ++i) {

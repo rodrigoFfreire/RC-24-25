@@ -49,7 +49,6 @@ void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPack
     reply->status = ReplyShowScoreboardPacket::EMPTY;
 
     try {
-        time_t now = state.getCommandTime();
         request.read(fd);
 
         std::string file_str = state.store.getScoreboard();
