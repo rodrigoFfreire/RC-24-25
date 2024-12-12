@@ -33,6 +33,6 @@ clean-db:
 	rm -rf ./.data/GAMES/*
 	rm -rf ./.data/SCORES/*
 
-clean: clean_client clean_server clean-db
+clean: clean-client clean-server clean-db
 
 .PHONY: all clean clean-client clean-server clean-db server client
