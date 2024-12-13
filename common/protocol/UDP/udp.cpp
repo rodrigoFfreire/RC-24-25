@@ -8,7 +8,7 @@ void StartNewGamePacket::decode(std::stringstream& packetStream) {
     playerID = parser.parsePlayerID();
     parser.next();
     time = parser.parseUInt();
-    if (time > PLAY_TIME_MAX)
+    if (!time || time > PLAY_TIME_MAX)
         throw InvalidPacketException();
     parser.end();
 }
@@ -216,7 +216,7 @@ void DebugPacket::decode(std::stringstream &packetStream) {
     playerID = parser.parsePlayerID();
     parser.next();
     time = parser.parseUInt();
-    if (time > PLAY_TIME_MAX)
+    if (!time || time > PLAY_TIME_MAX)
         throw InvalidPacketException();
     parser.parseKey(key);
     parser.end();

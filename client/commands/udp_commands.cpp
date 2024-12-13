@@ -23,7 +23,7 @@ unsigned short parsePlayTime(std::stringstream& command_stream) {
     if (command_stream.fail()) {
         throw InvalidPlayTimeException();
     }
-    if (play_time < 0 || play_time > PLAY_TIME_MAX) {
+    if (play_time <= 0 || play_time > PLAY_TIME_MAX) {
         throw InvalidPlayTimeException();
     }
 
