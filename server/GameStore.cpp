@@ -333,11 +333,17 @@ Game::Status GameStore::getLastGame(std::string &plid, time_t &cmd_tstamp, std::
     }
 
     output_ss << "\nPlayer: " << plid << " | Mode: " << gameModeToRepr(game.mode) << '\n';
+    output_ss << "Status: ";
 
     if (game.status == Game::Status::ACT) {
-        output_ss << "Status: Active | Secret code: ? ? ? ?\n";
+        output_ss << "Active | Secret code: ";
+        if (game.mode == GameMode::DEBUG) {
+            output_ss << game.key << '\n';
+        } else {
+            output_ss << "????" << '\n'; 
+        }
     } else {
-        output_ss << "Status: Finished | Secret code: " << game.key << '\n';
+        output_ss << "Finished | Secret code: " << game.key << '\n';
     }
 
     output_ss << "Game initiated: " << game.date_start << ' ' << game.time_start << ' ';
@@ -370,8 +376,8 @@ std::string GameStore::getScoreboard() {
     std::vector<fs::path> score_paths;
 
     std::ostringstream output_ss;
-    output_ss << "\n-------------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " --------------------\n\n";
-    output_ss << "                 SCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
+    output_ss << "\n---------------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " ----------------------\n\n";
+    output_ss << "                   SCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
 
     try {
         for (const auto& entry : fs::directory_iterator(scores_path)) {
@@ -392,7 +398,7 @@ std::string GameStore::getScoreboard() {
             LeaderboardEntry entry(file);
             file.close();
 
-            output_ss << "             " << i + 1 << " -  " << entry.score << "  " << entry.plid;
+            output_ss << "             " << i + 1 << "\t\t" << entry.score << "  " << entry.plid;
             output_ss << "     " << entry.key << "        " <<  entry.used_atts << "       " << gameModeToRepr(entry.mode) << "\n";
         }
     } catch (const EmptyScoreboardException& e) {
