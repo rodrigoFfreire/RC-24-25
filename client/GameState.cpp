@@ -24,7 +24,7 @@ void GameState::registerColorMap() {
     }
 }
 
-void GameState::startGame(unsigned int id, std::string* key, bool debug) {
+void GameState::startGame(std::string& id, std::string* key, bool debug) {
     plid = id;
     trial = 1;
     _isGame = true;
@@ -74,7 +74,7 @@ void GameState::endGame(std::string& key, Events event) {
     }
 }
 
-unsigned int GameState::getPlid() {
+std::string GameState::getPlid() {
     if (!_isGame && !_finished) {
         throw UncontextualizedException();
     }

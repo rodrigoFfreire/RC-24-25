@@ -10,8 +10,6 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
 
 void quitHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream);
 
-void exitHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream);
-
 void debugGameHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream);
 
 #endif

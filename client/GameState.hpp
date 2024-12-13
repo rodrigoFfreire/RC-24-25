@@ -17,8 +17,8 @@ private:
     bool _finished;
     bool _debug;
     bool _unicode;
-    unsigned int plid;
     unsigned int trial;
+    std::string plid;
     std::vector<std::string> guesses;
     std::vector<std::array<unsigned int, 2>> feedback;
     std::string _key;
@@ -34,9 +34,9 @@ public:
     enum Events { LOST_TIME, LOST_MAXTRIALS, WON, QUIT };
 
     bool isGame() {return _isGame;};
-    void startGame(unsigned int id, std::string* key, bool debug);
+    void startGame(std::string& plid, std::string* key, bool debug);
     void endGame(std::string& key, Events event);
-    unsigned int getPlid();
+    std::string getPlid();
     unsigned int newAttempt();
     unsigned int getTrial();
     void saveAttempt(std::string& att, unsigned int b, unsigned int w);

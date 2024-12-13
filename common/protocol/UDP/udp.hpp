@@ -14,7 +14,7 @@ class StartNewGamePacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "SNG";
     unsigned short time;
-    unsigned int playerID;
+    std::string playerID;
 
     void decode(std::stringstream& packetStream) override;
     std::string encode() const override;
@@ -46,8 +46,8 @@ public:
 class TryPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "TRY";
-    unsigned int playerID;
     unsigned int trial;
+    std::string playerID;
     std::string key;
 
     void decode(std::stringstream& packetStream) override;
@@ -92,7 +92,7 @@ public:
 class QuitPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "QUT";
-    unsigned int playerID;
+    std::string playerID;
 
     void decode(std::stringstream& packetStream) override;
     std::string encode() const override;
@@ -125,8 +125,8 @@ public:
 class DebugPacket : public UdpPacket {
 public:
     static constexpr const char* packetID = "DBG";
-    unsigned int playerID;
     unsigned int time;
+    std::string playerID;
     std::string key;
 
     void decode(std::stringstream& packetStream) override;

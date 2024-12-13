@@ -1,28 +1,50 @@
 #include "udp_commands.hpp"
 
-void buildStartGamePacket(std::stringstream& command_stream, StartNewGamePacket& packet) {
-    std::string playerID;
-    int playTime;
-    
-    command_stream >> playerID;
-    command_stream >> playTime;
+std::string parsePlayerID(std::stringstream& command_stream) {
+    int plid_num = -1;
 
-    long plid;
-    try {
-        plid = std::stoul(playerID);
-        if (plid < 0 || plid > PLID_MAX) {
-            throw InvalidPlayerIDException();
-        }
-    } catch (const std::exception& e) {
+    command_stream >> plid_num;
+    if (command_stream.fail()) {
+        throw InvalidPlayerIDException();
+    }
+    if (plid_num < 0 || plid_num > PLID_MAX) {
         throw InvalidPlayerIDException();
     }
 
-    if (playTime < 1 || playTime > PLAY_TIME_MAX) {
+    std::ostringstream formatted_plid;
+    formatted_plid << std::setw(PLAYER_ID_LEN) << std::setfill('0') << plid_num;
+    return formatted_plid.str();
+}
+
+unsigned short parsePlayTime(std::stringstream& command_stream) {
+    short play_time = -1;
+
+    command_stream >> play_time;
+    if (command_stream.fail()) {
+        throw InvalidPlayTimeException();
+    }
+    if (play_time < 0 || play_time > PLAY_TIME_MAX) {
         throw InvalidPlayTimeException();
     }
 
-    packet.playerID = static_cast<unsigned int>(plid);
-    packet.time = playTime;
+    return static_cast<unsigned short>(play_time);
+}
+
+std::string parseKey(std::stringstream& command_stream) {
+    std::string key(SECRET_KEY_LEN, '\0');
+    std::string valid_colors = VALID_COLORS;
+    
+    for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
+        char c;
+        command_stream >> c;
+        c = std::toupper(c);
+        if (valid_colors.find(c) == std::string::npos || command_stream.eof()) {
+            throw InvalidKeyException();
+        }
+        key[i] = c;
+    }
+
+    return key;
 }
 
 void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
@@ -31,7 +53,9 @@ void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream&
     std::stringstream responseStream;
 
     try {
-        buildStartGamePacket(command_stream, request);
+        request.playerID = parsePlayerID(command_stream);
+        request.time = parsePlayTime(command_stream);
+
         socket.sendPacket(&request);
         socket.receivePacket(responseStream);
 
@@ -57,23 +81,6 @@ void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream&
     }
 }
 
-void buildTryPacket(GameState& state, std::stringstream& command_stream, TryPacket& packet) {
-    std::string valid_colors = VALID_COLORS;
-    packet.key.resize(SECRET_KEY_LEN, '\0');
-    
-    for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
-        char c;
-        command_stream >> c;
-        c = std::toupper(c);
-        if (valid_colors.find(c) == std::string::npos || command_stream.eof()) {
-            throw InvalidKeyException();
-        }
-        packet.key[i] = c;
-    }
-    packet.playerID = state.getPlid();
-    packet.trial = state.getTrial();
-}
-
 void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     TryPacket request;
     ReplyTryPacket reply;
@@ -84,7 +91,10 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
             throw UncontextualizedException();
         }
         
-        buildTryPacket(state, command_stream, request);
+        request.key = parseKey(command_stream);
+        request.playerID = state.getPlid();
+        request.trial = state.getTrial();
+
         socket.sendPacket(&request);
         socket.receivePacket(responseStream);
 
@@ -159,49 +169,16 @@ void quitHandler(GameState& state, UdpSocket& socket, std::stringstream& command
     }
 }
 
-void buildDebugGamePacket(std::stringstream& command_stream, DebugPacket& packet) {
-    std::string playerID;
-    int playTime;
-    
-    command_stream >> playerID;
-    command_stream >> playTime;
-
-    long plid;
-    try {
-        plid = std::stoul(playerID);
-        if (plid < 0 || plid > PLID_MAX) {
-            throw InvalidPlayerIDException();
-        }
-    } catch (const std::exception& e) {
-        throw InvalidPlayerIDException();
-    }
-
-    if (playTime < 1 || playTime > PLAY_TIME_MAX) {
-        throw InvalidPlayTimeException();
-    }
-
-    std::string valid_colors = VALID_COLORS;
-    for (size_t i = 0; i < SECRET_KEY_LEN; i++) {
-        char c;
-        command_stream >> c;
-        c = std::toupper(c);
-        if (valid_colors.find(c) == std::string::npos || command_stream.eof()) {
-            throw InvalidKeyException();
-        }
-        packet.key[i] = c;
-    }
-
-    packet.playerID = static_cast<unsigned int>(plid);
-    packet.time = playTime;
-}
-
 void debugGameHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     DebugPacket request;
     ReplyDebugPacket reply;
     std::stringstream responseStream;
 
     try {
-        buildDebugGamePacket(command_stream, request);
+        request.playerID = parsePlayerID(command_stream);
+        request.time = parsePlayTime(command_stream);
+        request.key = parseKey(command_stream);
+
         socket.sendPacket(&request);
         socket.receivePacket(responseStream);
 

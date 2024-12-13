@@ -23,7 +23,7 @@ public:
     void end();
     std::string parsePacketID();
     std::string parseStatus();
-    unsigned int parsePlayerID();
+    std::string parsePlayerID();
     unsigned int parseUInt();
     char parseChar();
     void parseKey(std::string& key);

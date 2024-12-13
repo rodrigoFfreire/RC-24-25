@@ -15,8 +15,7 @@ void StartNewGamePacket::decode(std::stringstream& packetStream) {
 
 std::string StartNewGamePacket::encode() const {
     std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID;
+    encoded_stream << packetID << ' ' << playerID;
     encoded_stream << ' ' << time << '\n';
     return encoded_stream.str();
 }
@@ -70,8 +69,7 @@ void TryPacket::decode(std::stringstream &packetStream) {
 
 std::string TryPacket::encode() const {
     std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID;
+    encoded_stream << packetID << ' ' << playerID;
     for (int i = 0; i < SECRET_KEY_LEN; ++i)
         encoded_stream << ' ' << key[i];
     encoded_stream << ' ' << trial << '\n';
@@ -156,8 +154,7 @@ void QuitPacket::decode(std::stringstream& packetStream) {
 
 std::string QuitPacket::encode() const {
     std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID << '\n';
+    encoded_stream << packetID << ' ' << playerID << '\n';
     return encoded_stream.str();
 }
 
@@ -227,8 +224,7 @@ void DebugPacket::decode(std::stringstream &packetStream) {
 
 std::string DebugPacket::encode() const {
     std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << std::setfill('0') << std::setw(PLAYER_ID_LEN) << playerID;
+    encoded_stream << packetID << ' ' << playerID;
     encoded_stream << ' ' << time;
     for (int i = 0; i < SECRET_KEY_LEN; ++i) {
         encoded_stream << ' ' << key[i];
