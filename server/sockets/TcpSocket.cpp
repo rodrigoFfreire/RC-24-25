@@ -1,6 +1,7 @@
 #include "TcpSocket.hpp"
+#include <atomic>
 
-extern volatile std::sig_atomic_t terminate_flag;
+extern std::atomic<bool> terminateFlag;
 
 void TcpSocket::createSocket() {
     if (socket_fd != -1) {
@@ -76,7 +77,7 @@ int TcpSocket::acceptConnection(int& conn_fd, struct sockaddr_in& client_addr) {
                         reinterpret_cast<struct sockaddr*>(&client_addr),
                         &client_addrlen);
     if (conn_fd == -1) {
-        if (terminate_flag) {
+        if (terminateFlag.load()) {
             return TERMINATE;
         } else if (errno == EAGAIN || errno == EWOULDBLOCK) {
             return TIMEOUT;

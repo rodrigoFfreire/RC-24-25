@@ -1,22 +1,21 @@
+#include <chrono>
+
 #include "tcp_commands.hpp"
+#include "../exceptions/GameExceptions.hpp"
 
-#include "../../common/protocol/TCP/tcp.hpp"
 
-void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket) {
+void showTrialsHandler(const int fd, GameStore& store, Logger& logger, std::unique_ptr<TcpPacket>& replyPacket) {
     ShowTrialsPacket request;
     auto reply = std::make_unique<ReplyShowTrialsPacket>();
     reply->status = ReplyShowTrialsPacket::NOK;
 
     try {
-        time_t now = state.getCommandTime();
+        time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         request.read(fd);
 
-        std::ostringstream oss;
-        oss << std::setw(PLAYER_ID_LEN) << std::setfill('0') << request.playerID;
-        std::string plid = oss.str();
         std::string file_str;
 
-        Game::Status status = state.store.getLastGame(plid, now, file_str);
+        Game::Status status = store.getLastGame(request.playerID, now, file_str);
         switch (status) {
         case Game::Status::ACT:
             reply->status = ReplyShowTrialsPacket::ACT;
@@ -28,22 +27,22 @@ void showTrialsHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>&
             break;
         }
 
-        reply->fname = "STATE_" + plid + ".txt";
+        reply->fname = "STATE_" + request.playerID + ".txt";
         reply->fsize = file_str.size();
         reply->fdata = file_str + '\n';
 
         std::stringstream ss;
         ss << "[Player " << request.playerID << "] > Requested to show last game. (" << reply->fsize << " Bytes)\n";
-        state.logger.log(Logger::Severity::INFO, ss.str(), true);
+        logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const std::exception& e) {
         reply->status = ReplyShowTrialsPacket::NOK;
-        state.logger.log(Logger::Severity::WARN, e.what(), true);
+        logger.log(Logger::Severity::WARN, e.what(), true);
     }
 
     replyPacket = std::move(reply);
 }
 
-void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPacket>& replyPacket) {
+void showScoreboardHandler(const int fd, GameStore& store, Logger& logger, std::unique_ptr<TcpPacket>& replyPacket) {
     ShowScoreboardPacket request;
     auto reply = std::make_unique<ReplyShowScoreboardPacket>();
     reply->status = ReplyShowScoreboardPacket::EMPTY;
@@ -51,7 +50,7 @@ void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPack
     try {
         request.read(fd);
 
-        std::string file_str = state.store.getScoreboard();
+        std::string file_str = store.getScoreboard();
         
         reply->fname = "TOPSCORES.txt";
         reply->fsize = file_str.size();
@@ -60,13 +59,13 @@ void showScoreboardHandler(const int& fd, Server& state, std::unique_ptr<TcpPack
 
         std::stringstream ss;
         ss << "Sending scoreboard... (" << reply->fsize << " Bytes)\n";
-        state.logger.log(Logger::Severity::INFO, ss.str(), true);
+        logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const EmptyScoreboardException& e) {
         reply->status = ReplyShowScoreboardPacket::EMPTY;
-        state.logger.log(Logger::Severity::INFO, e.what(), true);
+        logger.log(Logger::Severity::INFO, e.what(), true);
     } catch (const std::exception& e) {
         reply->status = ReplyShowScoreboardPacket::EMPTY;
-        state.logger.log(Logger::Severity::WARN, e.what(), true);
+        logger.log(Logger::Severity::WARN, e.what(), true);
     }
 
     replyPacket = std::move(reply);

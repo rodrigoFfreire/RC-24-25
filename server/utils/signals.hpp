@@ -2,9 +2,11 @@
 #define SERVER_SIGNALS_HPP
 
 #include <csignal>
+#include <atomic>
+
 #include "../../common/exceptions/SignalHandlerErrors.hpp"
 
-extern volatile std::sig_atomic_t terminate_flag;
+extern std::atomic<bool> terminateFlag;
 
 void sig_handler(int signal);
 void register_signal_handler();

@@ -1,4 +1,9 @@
-#include "main.hpp"
+#include <thread>
+
+#include "Server.hpp"
+#include "utils/signals.hpp"
+#include "utils/Config.hpp"
+#include "../common/Logger.hpp"
 
 int main(int argc, char **argv) {
     Logger logger;
@@ -26,5 +31,5 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }

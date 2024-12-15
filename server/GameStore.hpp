@@ -1,29 +1,17 @@
 #ifndef SERVER_GAME_STORE_HPP
 #define SERVER_GAME_STORE_HPP
 
-#include <string>
 #include <filesystem>
-#include <fstream>
-#include <array>
-#include <algorithm>
 #include <vector>
-#include <unordered_map>
-#include <sstream>
-#include <random>
-#include "../common/constants.hpp"
-#include "exceptions/ServerExceptions.hpp"
-#include "exceptions/GameExceptions.hpp"
-#include "../common/utils.hpp"
 
-namespace fs = std::filesystem;
 
 enum GameMode { PLAY, DEBUG };
 enum Endings { WIN, LOST, QUIT, TIMEOUT };
 
-std::string gameModeToRepr(GameMode mode);
+std::string gameModeToRepr(const GameMode mode);
 GameMode charToGameMode(const char c);
 
-std::string endingToRepr(Endings ending);
+std::string endingToRepr(const Endings ending);
 Endings charToEnding(const char c);
 
 class LeaderboardEntry {
@@ -44,8 +32,8 @@ public:
     uint whites;
     uint time;
 
-    Attempt(std::string& att);
-    static std::string create(std::string& att, uint blacks, uint whites, time_t time);
+    Attempt(const std::string& att);
+    static std::string create(const std::string& att, const uint blacks, const uint whites, const time_t time);
 };
 
 class Game {
@@ -69,31 +57,29 @@ public:
 
     void parseGame(std::ifstream& file);
     void parseHeader(std::ifstream& file);
-    uint parseAttempts(std::ifstream& file, std::string& att, std::string& last_att, bool& dup);
-    static std::string create(std::string& plid, uint playTime, GameMode mode, time_t& cmd_tstamp, std::string& key);
+    uint parseAttempts(std::ifstream& file, const std::string& att, std::string& last_att, bool& dup);
+    static std::string create(const std::string& plid, const uint playTime, const GameMode mode, const time_t& cmd_tstamp, const std::string& key);
 };
 
 class GameStore {
 private:
+    std::filesystem::path storeDir;
+
+    int updateGameTime(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key);
+    void calculateAttempt(const std::string& key, const std::string& att, uint& whites, uint& blacks);
+    void saveGameScore(const std::string &plid, const std::string& key, const GameMode mode, const time_t &win_tstamp, const int used_atts, const int used_time);
+    void endGame(const std::string& plid, const Endings reason, const time_t& tstamp, std::ofstream& file, const int play_time);
     std::string generateKey();
+    std::string findLastFinishedGame(const std::string& plid);
 
 public:
-    GameStore(std::string& dir);
+    GameStore(const std::string& dir);
 
-    std::string createGame(std::string& plid, uint playTime, time_t& cmd_tstamp, std::string* key);
-    uint attempt(std::string& plid, std::string& key, uint trial, uint& blacks, uint& whites, time_t& cmd_tstamp, std::string& real_key);
-    std::string quitGame(std::string& plid, time_t& cmd_tstamp);
-    Game::Status getLastGame(std::string& plid, time_t& cmd_tstamp, std::string& output);
+    std::string createGame(const std::string& plid, const time_t& cmd_tstamp, const uint playTime, std::string* key);
+    uint attempt(const std::string& plid, const time_t& cmd_tstamp, const std::string& att, const uint trial, uint& blacks, uint& whites, std::string& real_key);
+    std::string quitGame(const std::string& plid, const time_t& cmd_tstamp);
+    Game::Status getLastGame(const std::string& plid, const time_t& cmd_tstamp, std::string& output);
     std::string getScoreboard();
-
-private:
-    fs::path storeDir;
-
-    int updateGameTime(std::string& plid, time_t& cmd_tstamp, std::string* revealed_key);
-    void calculateAttempt(std::string& key, std::string& att, uint& whites, uint& blacks);
-    void saveGameScore(std::string &plid, std::string& key, GameMode mode, time_t &win_tstamp, int used_atts, int used_time);
-    void endGame(std::string& plid, Endings reason, time_t& tstamp, std::ofstream& file, int play_time);
-    std::string findLastFinishedGame(std::string& plid);
 };
 
 #endif

@@ -1,6 +1,7 @@
 #include "UdpSocket.hpp"
+#include <atomic>
 
-extern volatile std::sig_atomic_t terminate_flag;
+extern std::atomic<bool> terminateFlag;
 
 void UdpSocket::createSocket() {
     if (socket_fd != -1) {
@@ -76,7 +77,7 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
                                 reinterpret_cast<struct sockaddr*>(&client_addr),
                                 &client_addrlen);
     if (received_bytes == -1) {
-        if (terminate_flag) {
+        if (terminateFlag.load()) {
             return TERMINATE;
         } else if(errno == EAGAIN || errno == EWOULDBLOCK) {
             return TIMEOUT;

@@ -1,6 +1,17 @@
+#include <fstream>
+#include <vector>
+#include <algorithm>
+
 #include "GameStore.hpp"
 
-std::string gameModeToRepr(GameMode mode) {
+#include "exceptions/GameExceptions.hpp"
+#include "exceptions/ServerExceptions.hpp"
+#include "../common/utils.hpp"
+#include "../common/constants.hpp"
+
+namespace fs = std::filesystem;
+
+std::string gameModeToRepr(const GameMode mode) {
     switch (mode) {
     case GameMode::PLAY:
         return "PLAY";
@@ -22,7 +33,7 @@ GameMode charToGameMode(const char c) {
     }
 }
 
-std::string endingToRepr(Endings ending) {
+std::string endingToRepr(const Endings ending) {
     switch (ending) {
     case Endings::LOST:
         return "LOST";
@@ -52,7 +63,7 @@ Endings charToEnding(const char c) {
     }
 }
 
-Attempt::Attempt(std::string& att) : blacks(0), whites(0), time(0) {
+Attempt::Attempt(const std::string& att) : blacks(0), whites(0), time(0) {
     std::string prefix;
     std::istringstream stream(att);
 
@@ -63,7 +74,7 @@ Attempt::Attempt(std::string& att) : blacks(0), whites(0), time(0) {
     stream >> time;
 }
 
-std::string Attempt::create(std::string &att, uint blacks, uint whites, time_t time) {
+std::string Attempt::create(const std::string &att, const uint blacks, const uint whites, const time_t time) {
     std::ostringstream att_ss;
     att_ss << "T: " << att << ' ' << blacks << ' ' << whites << ' ' << time << '\n';
 
@@ -87,7 +98,7 @@ void Game::parseHeader(std::ifstream &file) {
     mode = charToGameMode(mode_char);
 }
 
-uint Game::parseAttempts(std::ifstream &file, std::string& att, std::string& last_att, bool& dup) {
+uint Game::parseAttempts(std::ifstream &file, const std::string& att, std::string& last_att, bool& dup) {
     std::string attempt_line;
     uint atts = 0;
     while (std::getline(file, attempt_line)) {
@@ -125,7 +136,7 @@ void Game::parseGame(std::ifstream &file) {
     }
 }
 
-std::string Game::create(std::string &plid, uint playTime, GameMode mode, time_t &cmd_tstamp, std::string& key) {
+std::string Game::create(const std::string &plid, const uint playTime, const GameMode mode, const time_t &cmd_tstamp, const std::string& key) {
     std::ostringstream header_ss;
 
     header_ss << plid << ' ';
@@ -160,11 +171,11 @@ std::string GameStore::generateKey() {
     return key;
 }
 
-void GameStore::calculateAttempt(std::string &key, std::string &att, uint &whites, uint &blacks) {
+void GameStore::calculateAttempt(const std::string &key, const std::string &att, uint &whites, uint &blacks) {
     const std::string valid_colors = VALID_COLORS;
 
-    std::array<int, VALID_COLORS_LEN> key_count({0});
-    std::array<int, VALID_COLORS_LEN> attempt_count({0});
+    int key_count[VALID_COLORS_LEN] = {0};
+    int attempt_count[VALID_COLORS_LEN] = {0};
 
     // First pass: Count black pegs and build frequency arrays
     for (int i = 0; i < SECRET_KEY_LEN; ++i) {
@@ -183,7 +194,7 @@ void GameStore::calculateAttempt(std::string &key, std::string &att, uint &white
     }
 }
 
-void GameStore::saveGameScore(std::string &plid, std::string& key, GameMode mode, time_t &win_tstamp, int used_atts, int used_time) {
+void GameStore::saveGameScore(const std::string &plid, const std::string& key, const GameMode mode, const time_t &win_tstamp, const int used_atts, const int used_time) {
     std::ostringstream score_fname;
     std::ostringstream score_header;
 
@@ -210,11 +221,11 @@ void GameStore::saveGameScore(std::string &plid, std::string& key, GameMode mode
     }
 }
 
-GameStore::GameStore(std::string &dir) {
+GameStore::GameStore(const std::string &dir) {
     storeDir = fs::read_symlink("/proc/self/exe").parent_path() / dir;
 }
 
-int GameStore::updateGameTime(std::string& plid, time_t& cmd_tstamp, std::string* revealed_key) {
+int GameStore::updateGameTime(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key) {
     std::string game_fname = "GAME_" + plid + ".txt";
     fs::path game_path = storeDir / "GAMES" / game_fname;
 
@@ -248,7 +259,7 @@ int GameStore::updateGameTime(std::string& plid, time_t& cmd_tstamp, std::string
     }
 }
 
-std::string GameStore::createGame(std::string& plid, uint playTime, time_t& cmd_tstamp, std::string* key) {
+std::string GameStore::createGame(const std::string& plid, const time_t& cmd_tstamp, const uint playTime, std::string* key) {
     if (updateGameTime(plid, cmd_tstamp, nullptr) > 0) {
         throw OngoingGameException();
     }
@@ -281,7 +292,7 @@ std::string GameStore::createGame(std::string& plid, uint playTime, time_t& cmd_
     return new_key;
 }
 
-std::string GameStore::quitGame(std::string &plid, time_t &cmd_tstamp) {
+std::string GameStore::quitGame(const std::string &plid, const time_t &cmd_tstamp) {
     if (updateGameTime(plid, cmd_tstamp, nullptr) < 0) {
         throw UncontextualizedGameException();
     }
@@ -307,7 +318,7 @@ std::string GameStore::quitGame(std::string &plid, time_t &cmd_tstamp) {
     return game.key;
 }
 
-Game::Status GameStore::getLastGame(std::string &plid, time_t &cmd_tstamp, std::string &output) {
+Game::Status GameStore::getLastGame(const std::string &plid, const time_t &cmd_tstamp, std::string &output) {
     Game game;
     fs::path game_path;
     std::ostringstream output_ss;
@@ -377,7 +388,7 @@ std::string GameStore::getScoreboard() {
 
     std::ostringstream output_ss;
     output_ss << "\n---------------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " ----------------------\n\n";
-    output_ss << "                   SCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
+    output_ss << "               \tSCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
 
     try {
         for (const auto& entry : fs::directory_iterator(scores_path)) {
@@ -410,7 +421,7 @@ std::string GameStore::getScoreboard() {
     return output_ss.str();
 }
 
-uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &blacks, uint &whites, time_t& cmd_tstamp, std::string& real_key) {
+uint GameStore::attempt(const std::string &plid, const time_t& cmd_tstamp, const std::string& att, const uint trial, uint &blacks, uint &whites, std::string& real_key) {
     int err = updateGameTime(plid, cmd_tstamp, &real_key);
     if (err == -1) {
         throw UncontextualizedGameException();
@@ -426,7 +437,7 @@ uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &b
         throw DBFilesystemError();
     }
 
-    bool isDup;
+    bool isDup = false;
     std::string last_att;
     uint num_attempts = 0;
     Game game;
@@ -474,7 +485,7 @@ uint GameStore::attempt(std::string &plid, std::string& att, uint trial, uint &b
     return ++num_attempts;
 }
 
-void GameStore::endGame(std::string& plid, Endings reason, time_t& tstamp, std::ofstream& file, int used_time) {
+void GameStore::endGame(const std::string& plid, const Endings reason, const time_t& tstamp, std::ofstream& file, const int used_time) {
     std::ostringstream ss;
     formatTimestamp(ss, &tstamp, TSTAMP_DATE_TIME_PRETTY);
     ss << ' ' << used_time << ' ' << endingToRepr(reason)[0] << '\n';
@@ -500,7 +511,7 @@ void GameStore::endGame(std::string& plid, Endings reason, time_t& tstamp, std::
     }
 }
 
-std::string GameStore::findLastFinishedGame(std::string &plid) {
+std::string GameStore::findLastFinishedGame(const std::string &plid) {
     fs::path dir = storeDir / "GAMES" / plid;
     std::vector<std::string> filenames;
 

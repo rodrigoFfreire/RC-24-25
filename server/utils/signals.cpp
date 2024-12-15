@@ -1,10 +1,11 @@
 #include "signals.hpp"
 
-volatile std::sig_atomic_t terminate_flag = 0;
+std::atomic<bool> terminateFlag(false);
 
 void sig_handler(int signal) {
   (void)signal;
-  terminate_flag = 1;
+  terminateFlag = true;
+
 }
 
 void register_signal_handler() {

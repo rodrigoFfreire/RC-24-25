@@ -1,4 +1,5 @@
 #include "WorkerPool.hpp"
+#include <iostream>
 
 void WorkerPool::workerThread() {
     while (1) {
@@ -30,8 +31,8 @@ WorkerPool::~WorkerPool() {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         isStopping = true;
+        alertCond.notify_all();
     }
-    alertCond.notify_all();
 
     for (std::thread &worker : workers) {
         if (worker.joinable()) {
@@ -44,6 +45,6 @@ void WorkerPool::enqueueConnection(std::function<void()> connHandler) {
     {
         std::lock_guard<std::mutex> lock(queueMutex);
         connectionQueue.push(connHandler);
+        alertCond.notify_one();
     }
-    alertCond.notify_one();
 }
