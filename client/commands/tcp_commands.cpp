@@ -6,8 +6,13 @@ void showTrialsHandler(GameState& state, TcpSocket& socket) {
 
     try {
         request.playerID = state.getPlid();
+
+        socket.setup();
+
         socket.sendPacket(&request);
         socket.receivePacket(&reply);
+
+        socket.end();
 
         switch (reply.status) {
         case ReplyShowTrialsPacket::ACT:
@@ -30,8 +35,12 @@ void showScoreboardHandler(GameState& state, TcpSocket& socket) {
     ReplyShowScoreboardPacket reply;
 
     try {
+        socket.setup();
+
         socket.sendPacket(&request);
         socket.receivePacket(&reply);
+
+        socket.end();
 
         switch (reply.status) {
         case ReplyShowScoreboardPacket::OK:
