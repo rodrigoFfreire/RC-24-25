@@ -105,7 +105,7 @@ void debugGameHandler(std::stringstream &packetStream, GameStore& store, Logger&
         std::time_t now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
         request.decode(packetStream);
 
-        store.createGame(request.playerID, request.time, now, &request.key);
+        store.createGame(request.playerID, now, request.time, &request.key);
 
         std::stringstream ss;
         ss << "[Player " << request.playerID << "] > Debug game (max " << request.time << "s); " << request.key;
