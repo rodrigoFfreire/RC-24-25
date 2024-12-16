@@ -47,6 +47,8 @@ void Logger::log(Severity level, const std::string& msg, bool newLine) {
             std::cerr << log_msg;
             if (newLine) std::cerr << std::endl;
             break;
+        default:
+            break;
     }
 }
 

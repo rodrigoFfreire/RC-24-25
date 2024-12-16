@@ -17,7 +17,7 @@ ssize_t safe_read(int fd, char* buffer, size_t n) {
         else if (rd_bytes == 0)
           throw ConnectionResetError();
 
-        n -= (size_t)rd_bytes;
+        n -= static_cast<size_t>(rd_bytes);
         completed_bytes += rd_bytes;
     }
 
@@ -41,7 +41,7 @@ ssize_t safe_write(int fd, const char* buffer, size_t n) {
     else if (wr_bytes == 0)
       break;
 
-    n -= (size_t)wr_bytes;
+    n -= static_cast<size_t>(wr_bytes);
     completed_bytes += wr_bytes;
   }
 

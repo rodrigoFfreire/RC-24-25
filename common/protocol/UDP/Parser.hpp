@@ -11,8 +11,8 @@ class UdpParser {
 private:
     std::stringstream& packetStream;
 
-    std::string parseFixedString(size_t size);
-    std::string parseFixedDigitString(size_t size);
+    std::string parseFixedString(ulong size);
+    std::string parseFixedDigitString(ulong size);
     char parseColorChar();
     void checkNextChar(const char c);
 

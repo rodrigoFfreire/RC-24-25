@@ -70,7 +70,7 @@ void TryPacket::decode(std::stringstream &packetStream) {
 std::string TryPacket::encode() const {
     std::stringstream encoded_stream;
     encoded_stream << packetID << ' ' << playerID;
-    for (int i = 0; i < SECRET_KEY_LEN; ++i)
+    for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
         encoded_stream << ' ' << key[i];
     encoded_stream << ' ' << trial << '\n';
     return encoded_stream.str();
@@ -128,7 +128,7 @@ std::string ReplyTryPacket::encode() const {
         break;
     case ENT:
     case ETM:
-        for (int i = 0; i < SECRET_KEY_LEN; ++i)
+        for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
             encoded_stream << ' ' << key[i];
         break;
     case DUP:
@@ -193,7 +193,7 @@ std::string ReplyQuitPacket::encode() const {
     encoded_stream << statusToStr(status);
     switch (status) {
     case OK:
-        for (int i = 0; i < SECRET_KEY_LEN; ++i)
+        for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
             encoded_stream << ' ' << key[i];
         break;
     case NOK:
@@ -226,7 +226,7 @@ std::string DebugPacket::encode() const {
     std::stringstream encoded_stream;
     encoded_stream << packetID << ' ' << playerID;
     encoded_stream << ' ' << time;
-    for (int i = 0; i < SECRET_KEY_LEN; ++i) {
+    for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
         encoded_stream << ' ' << key[i];
     }
     encoded_stream << '\n';

@@ -27,18 +27,7 @@ std::string TcpParser::parseVariableString(size_t max_size, char end) {
     std::string buffer(max_size, '\0');
 
     while (max_size > 0) {
-        ssize_t rd_bytes = read(connection_fd, &(buffer[completed_bytes]), 1);
-
-        if (rd_bytes < 0) {
-          if (errno == EAGAIN || errno == EWOULDBLOCK) {
-            throw ConnectionTimeoutError();
-          } else if (errno == ECONNRESET) {
-            throw ConnectionResetError();
-          }
-          throw ConnectionReadError();
-        }
-        else if (rd_bytes == 0)
-          throw ConnectionResetError();
+        ssize_t rd_bytes = safe_read(connection_fd, &(buffer[completed_bytes]), 1);
 
         if (std::isspace(buffer[completed_bytes])) {
             if (buffer[completed_bytes] != end) {
@@ -48,7 +37,7 @@ std::string TcpParser::parseVariableString(size_t max_size, char end) {
             break;
         }
 
-        max_size -= (size_t)rd_bytes;
+        max_size -= static_cast<size_t>(rd_bytes);
         completed_bytes += rd_bytes;
     }
 
@@ -118,5 +107,5 @@ std::string TcpParser::parseFile(unsigned short file_size) {
     char buffer[FSIZE_MAX];
 
     ssize_t read_bytes = safe_read(connection_fd, buffer, file_size);
-    return std::string(buffer, read_bytes);
+    return std::string(buffer, static_cast<size_t>(read_bytes));
 }

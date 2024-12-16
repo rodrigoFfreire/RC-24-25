@@ -1,20 +1,20 @@
 #include "Parser.hpp"
 
-std::string UdpParser::parseFixedString(size_t size) {
+std::string UdpParser::parseFixedString(ulong size) {
     std::string buffer(size, '\0');
     char* data = buffer.data();
 
     packetStream.read(data, size);
-    if (!packetStream || packetStream.gcount() != (long)size) {
+    if (!packetStream || packetStream.gcount() != size) {
         throw InvalidPacketException();
     }
 
     return std::string(data);
 }
 
-std::string UdpParser::parseFixedDigitString(size_t size) {
+std::string UdpParser::parseFixedDigitString(ulong size) {
     std::string str(size, '\0');
-    for (size_t i = 0; i < size; ++i) {
+    for (ulong i = 0; i < size; ++i) {
         char c;
         packetStream >> c;
         if (!packetStream.good() || !std::isdigit(c)) {
@@ -77,8 +77,8 @@ std::string UdpParser::parseStatus() {
 std::string UdpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLID_LEN);
     try {
-        long n = std::stoul(plID_str);
-        if (n < 0 || n > PLID_MAX)
+        ulong n = std::stoul(plID_str);
+        if (n > PLID_MAX)
             throw InvalidPacketException();
 
         return plID_str;
@@ -97,7 +97,7 @@ char UdpParser::parseChar() {
 }
 
 void UdpParser::parseKey(std::string& key) {
-    for (int i = 0; i < SECRET_KEY_LEN; ++i) {
+    for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
         this->next();
         key[i] = this->parseColorChar();
     }
