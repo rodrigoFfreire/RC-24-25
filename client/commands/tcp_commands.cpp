@@ -12,8 +12,6 @@ void showTrialsHandler(GameState& state, TcpSocket& socket) {
         socket.sendPacket(&request);
         socket.receivePacket(&reply);
 
-        socket.end();
-
         switch (reply.status) {
         case ReplyShowTrialsPacket::ACT:
         case ReplyShowTrialsPacket::FIN:
@@ -28,6 +26,8 @@ void showTrialsHandler(GameState& state, TcpSocket& socket) {
     } catch (const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
     }
+
+    socket.end();
 }
 
 void showScoreboardHandler(GameState& state, TcpSocket& socket) {
@@ -39,8 +39,6 @@ void showScoreboardHandler(GameState& state, TcpSocket& socket) {
 
         socket.sendPacket(&request);
         socket.receivePacket(&reply);
-
-        socket.end();
 
         switch (reply.status) {
         case ReplyShowScoreboardPacket::OK:
@@ -57,4 +55,6 @@ void showScoreboardHandler(GameState& state, TcpSocket& socket) {
     } catch (const std::exception& e) {
         std::cerr << "ERROR: " << e.what() << std::endl;
     }
+
+    socket.end();
 }
