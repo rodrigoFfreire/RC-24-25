@@ -7,6 +7,10 @@
 #include "constants.hpp"
 #include "utils.hpp"
 
+#define LOGGER_LEVEL_INFO           "INFO"
+#define LOGGER_LEVEL_WARNING        "WARN"
+#define LOGGER_LEVEL_ERROR          "ERR"
+
 class Logger {
 public:
     enum class Severity { INFO, WARN, ERROR };

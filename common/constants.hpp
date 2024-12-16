@@ -5,10 +5,6 @@
 #define DEFAULT_PORT                "58065"
 #define DEFAULT_DATA_PATH           ".data"
 
-#define LOGGER_LEVEL_INFO           "INFO"
-#define LOGGER_LEVEL_WARNING        "WARN"
-#define LOGGER_LEVEL_ERROR          "ERR"
-
 #define TSTAMP_DATE_TIME_PRETTY     "%Y-%m-%d %H:%M:%S"
 #define TSTAMP_DATE_TIME_PRETTY_    "%Y-%m-%d_%H:%M:%S"
 #define TSTAMP_DATE_TIME_           "%Y%m%d_%H%M%S"
