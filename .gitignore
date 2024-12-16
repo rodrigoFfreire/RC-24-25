@@ -3,8 +3,11 @@
 *.dSYM
 *.txt
 *.log
+*.html
+*.zip
 
 GS
 player
 
 test/
+scripts/
