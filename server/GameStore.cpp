@@ -387,8 +387,8 @@ std::string GameStore::getScoreboard() {
     std::vector<fs::path> score_paths;
 
     std::ostringstream output_ss;
-    output_ss << "\n---------------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " ----------------------\n\n";
-    output_ss << "               \tSCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
+    output_ss << "\n----------------- Mastermind Leaderboard - TOP " << SCOREBOARD_MAX_ENTRIES << " -----------------\n\n";
+    output_ss << "        \tSCORE PLAYER     CODE    NO TRIALS   MODE\n\n";
 
     try {
         for (const auto& entry : fs::directory_iterator(scores_path)) {
@@ -409,7 +409,7 @@ std::string GameStore::getScoreboard() {
             LeaderboardEntry entry(file);
             file.close();
 
-            output_ss << "             " << i + 1 << "\t\t" << entry.score << "  " << entry.plid;
+            output_ss << "        " << i + 1 << "\t " << entry.score << "  " << entry.plid;
             output_ss << "     " << entry.key << "        " <<  entry.used_atts << "       " << gameModeToRepr(entry.mode) << "\n";
         }
     } catch (const EmptyScoreboardException& e) {

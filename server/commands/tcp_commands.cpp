@@ -62,7 +62,7 @@ void showScoreboardHandler(const int fd, GameStore& store, Logger& logger, std::
         logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const EmptyScoreboardException& e) {
         reply->status = ReplyShowScoreboardPacket::EMPTY;
-        logger.log(Logger::Severity::INFO, e.what(), true);
+        logger.log(Logger::Severity::WARN, e.what(), true);
     } catch (const std::exception& e) {
         reply->status = ReplyShowScoreboardPacket::EMPTY;
         logger.log(Logger::Severity::WARN, e.what(), true);
