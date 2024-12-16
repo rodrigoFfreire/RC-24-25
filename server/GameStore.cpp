@@ -222,7 +222,11 @@ void GameStore::saveGameScore(const std::string &plid, const std::string& key, c
 }
 
 GameStore::GameStore(const std::string &dir) {
-    storeDir = fs::read_symlink("/proc/self/exe").parent_path() / dir;
+    storeDir = fs::current_path() / dir;
+
+    fs::create_directory(storeDir);
+    fs::create_directory(storeDir / "GAMES");
+    fs::create_directory(storeDir / "SCORES");
 }
 
 int GameStore::updateGameTime(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key) {
