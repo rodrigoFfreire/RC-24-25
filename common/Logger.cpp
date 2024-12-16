@@ -3,11 +3,23 @@
 std::string Logger::format(Severity level, const std::string &msg) {
     std::ostringstream ss;
 
+    switch (level) {
+    case Severity::WARN:
+        ss << "\033[1;33m";
+        break;
+    case Severity::ERROR:
+        ss << "\033[1;31m";
+        break;
+    case Severity::INFO:
+    default:
+        break;
+    }
+
     ss << "[";
     formatTimestamp(ss, nullptr, TSTAMP_DATE_TIME_PRETTY);
     ss << "] ";
     ss << "[" << severityToStr(level) << "] ";
-    ss << msg;
+    ss << msg << "\033[0m";
 
     return ss.str();
 }
