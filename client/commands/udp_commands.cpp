@@ -145,6 +145,10 @@ void quitHandler(GameState& state, UdpSocket& socket, std::stringstream& command
     std::stringstream responseStream;
 
     try {
+        if (!state.isGame()) {
+            throw UncontextualizedException();
+        }
+
         request.playerID = state.getPlid();
         socket.sendPacket(&request);
         socket.receivePacket(responseStream);
