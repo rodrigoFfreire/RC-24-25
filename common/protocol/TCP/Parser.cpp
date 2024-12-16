@@ -85,7 +85,7 @@ std::string TcpParser::parseStatus() {
 }
 
 std::string TcpParser::parsePlayerID() {
-    std::string plID_str = parseFixedDigitString(PLAYER_ID_LEN);
+    std::string plID_str = parseFixedDigitString(PLID_LEN);
     try {
         int n = std::stoul(plID_str);
         if (n < 0 || n > PLID_MAX)

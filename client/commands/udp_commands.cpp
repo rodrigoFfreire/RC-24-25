@@ -12,7 +12,7 @@ std::string parsePlayerID(std::stringstream& command_stream) {
     }
 
     std::ostringstream formatted_plid;
-    formatted_plid << std::setw(PLAYER_ID_LEN) << std::setfill('0') << plid_num;
+    formatted_plid << std::setw(PLID_LEN) << std::setfill('0') << plid_num;
     return formatted_plid.str();
 }
 

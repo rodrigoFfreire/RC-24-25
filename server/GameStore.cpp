@@ -198,7 +198,7 @@ void GameStore::saveGameScore(const std::string &plid, const std::string& key, c
     std::ostringstream score_fname;
     std::ostringstream score_header;
 
-    int score = 701 + ((MAX_GUESSES - used_atts * used_atts) * 100) / MAX_GUESSES + ((PLAY_TIME_MAX - used_time) * 211) / PLAY_TIME_MAX;
+    int score = 701 + ((GUESSES_MAX - used_atts * used_atts) * 100) / GUESSES_MAX + ((PLAY_TIME_MAX - used_time) * 211) / PLAY_TIME_MAX;
 
     score_fname << score << '_' << plid << '_';
     formatTimestamp(score_fname, &win_tstamp, TSTAMP_DATE_TIME_PRETTY_);
@@ -473,7 +473,7 @@ uint GameStore::attempt(const std::string &plid, const time_t& cmd_tstamp, const
         throw DBFilesystemError();
     }
 
-    if (num_attempts == MAX_GUESSES - 1 && blacks != SECRET_KEY_LEN) {
+    if (num_attempts == GUESSES_MAX - 1 && blacks != SECRET_KEY_LEN) {
         endGame(plid, Endings::LOST, cmd_tstamp, o_file, used_time);
         real_key = game.key;
         throw ExceededMaxTrialsException();

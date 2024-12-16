@@ -2,7 +2,7 @@
 #include <iostream>
 
 void ShowTrialsPacket::read(int connection_fd) {
-    playerID.resize(PLAYER_ID_LEN, '\0');
+    playerID.resize(PLID_LEN, '\0');
 
     TcpParser parser(connection_fd);
     
