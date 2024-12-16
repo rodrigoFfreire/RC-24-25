@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
         udpThread.join();
         tcpThread.join();
     } catch (const std::exception& e) {
-        logger.log(Logger::Severity::ERROR, e.what(), true);
+        std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }
 

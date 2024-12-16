@@ -24,7 +24,7 @@ void Server::setupUdp() {
     const addrinfo* info = _udpSocket.getSocketInfo();
     struct sockaddr_in *udp_addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
     inet_ntop(info->ai_family, &udp_addr->sin_addr, ipstr, sizeof(ipstr));
-    log_msg << "Udp socket binded to " << ipstr << ":" << _port;
+    log_msg << "UDP socket binded to " << ipstr << ":" << _port;
 
     logger.log(Logger::Severity::INFO, log_msg.str(), true);
 
@@ -79,6 +79,9 @@ void Server::handleTcpCommand(const std::string &packetId, const int conn_fd, st
 void Server::runUdp() {
     while (!terminateFlag.load()) {
         struct sockaddr_in client_addr;
+        std::string response;
+        char client_addrstr[INET_ADDRSTRLEN];
+
         try {
             std::unique_ptr<UdpPacket> replyPacket = nullptr;
             std::stringstream packetStream;
@@ -93,10 +96,9 @@ void Server::runUdp() {
 
             // Get client address and port
             const addrinfo* info = _udpSocket.getSocketInfo();
-            char client_addrstr[INET_ADDRSTRLEN];
             inet_ntop(info->ai_family, &client_addr.sin_addr, client_addrstr, sizeof(client_addrstr));
 
-            // Log client request
+            // Log request (verbose)
             std::ostringstream log_msg;
             std::string packetStr = packetStream.str();
             log_msg << "(UDP) " << "[" << client_addrstr << ":" << ntohs(client_addr.sin_port) << "] > ";
@@ -112,12 +114,12 @@ void Server::runUdp() {
 
             // Send reply
             if (replyPacket != nullptr)
-                _udpSocket.sendPacket(replyPacket, client_addr);
+                response = _udpSocket.sendPacket(replyPacket, client_addr);
         } catch (const CommonException& e) {
             logger.log(Logger::Severity::WARN, e.what(), true);
             try {
                 std::unique_ptr<UdpPacket> errPacket = std::make_unique<UdpErrorPacket>();
-                _udpSocket.sendPacket(errPacket, client_addr);
+                response = _udpSocket.sendPacket(errPacket, client_addr);
             } catch (const ServerSendError& e) {
                 logger.log(Logger::Severity::ERROR, e.what(), true);
             }
@@ -125,12 +127,19 @@ void Server::runUdp() {
             logger.log(Logger::Severity::WARN, e.what(), true);
             try {
                 std::unique_ptr<UdpPacket> errPacket = std::make_unique<UdpErrorPacket>();
-                _udpSocket.sendPacket(errPacket, client_addr);
+                response = _udpSocket.sendPacket(errPacket, client_addr);
             } catch (const ServerSendError& e) {
                 logger.log(Logger::Severity::ERROR, e.what(), true);
             }
         } catch (const std::exception& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
+        }
+
+        if (!response.empty()) {
+            std::ostringstream log_msg;
+            log_msg << "(UDP) " << '\"' << response << '\"';
+            log_msg << " > [" << client_addrstr << ":" << ntohs(client_addr.sin_port) << ']';
+            logger.logVerbose(Logger::Severity::INFO, log_msg.str(), true);
         }
     }
     logger.log(Logger::Severity::INFO, "UDP monitor terminated!", true);
@@ -160,8 +169,8 @@ void Server::runTcp() {
 
             // Handle connection with worker thread
             _tcpSocket.setupConnection(conn_fd);
-            _tcpPool.enqueueConnection([this, conn_fd] {
-                handleTcpConnection(conn_fd);
+            _tcpPool.enqueueConnection([this, conn_fd, client_addrstr, client_addr] {
+                handleTcpConnection(conn_fd, client_addrstr, client_addr);
             });
         } catch (const CommonError& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
@@ -170,8 +179,9 @@ void Server::runTcp() {
     logger.log(Logger::Severity::INFO, "TCP monitor terminated! Closing worker threads...", true);
 }
 
-void Server::handleTcpConnection(int conn_fd) {
+void Server::handleTcpConnection(const int conn_fd, const char *client_addrstr, const sockaddr_in& client_addr) {
     std::unique_ptr<TcpPacket> replyPacket = nullptr;
+    std::string response;
 
     try {
         // Get packet ID
@@ -183,12 +193,12 @@ void Server::handleTcpConnection(int conn_fd) {
 
         // Send reply
         if (replyPacket != nullptr)
-            replyPacket->send(conn_fd);
+            response = replyPacket->send(conn_fd);
     } catch (const CommonException& e) {
         logger.log(Logger::Severity::WARN, e.what(), true);
         try {
             std::unique_ptr<TcpPacket> errPacket = std::make_unique<TcpErrorPacket>();
-            errPacket->send(conn_fd);
+            response = errPacket->send(conn_fd);
         } catch (const ServerSendError& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }
@@ -196,12 +206,18 @@ void Server::handleTcpConnection(int conn_fd) {
         logger.log(Logger::Severity::WARN, e.what(), true);
         try {
             std::unique_ptr<TcpPacket> errPacket = std::make_unique<TcpErrorPacket>();
-            errPacket->send(conn_fd);
+            response = errPacket->send(conn_fd);
         } catch (const ServerSendError& e) {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }
     } catch (const std::exception& e) {
         logger.log(Logger::Severity::ERROR, e.what(), true);
+    }
+
+    if (!response.empty()) {
+        std::ostringstream log_msg;
+        log_msg << "(TCP) " << response << " > [ " << client_addrstr << ":" << ntohs(client_addr.sin_port) << "]";
+        logger.logVerbose(Logger::Severity::INFO, log_msg.str(), true);
     }
 
     close(conn_fd);

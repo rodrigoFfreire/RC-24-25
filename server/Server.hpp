@@ -37,7 +37,7 @@ public:
     void setupTcp();
     void runUdp();
     void runTcp();
-    void handleTcpConnection(const int conn_fd);
+    void handleTcpConnection(const int conn_fd, const char *client_addrstr, const sockaddr_in& client_addr);
     std::time_t getCommandTime();
 };
 

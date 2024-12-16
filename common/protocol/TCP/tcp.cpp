@@ -11,12 +11,14 @@ void ShowTrialsPacket::read(int connection_fd) {
     parser.end();
 }
 
-void ShowTrialsPacket::send(int connection_fd) const {
+std::string ShowTrialsPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
     encoded_stream << packetID << ' ' << playerID << '\n';
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
+
+    return encoded_str;
 }
 
 void ReplyShowTrialsPacket::read(int connection_fd) {
@@ -50,7 +52,7 @@ void ReplyShowTrialsPacket::read(int connection_fd) {
     parser.end();
 }
 
-void ReplyShowTrialsPacket::send(int connection_fd) const {
+std::string ReplyShowTrialsPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
     encoded_stream << packetID << ' ' << statusToStr(status);
     switch (status) {
@@ -68,6 +70,8 @@ void ReplyShowTrialsPacket::send(int connection_fd) const {
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
+
+    return encoded_str;
 }
 
 void ShowScoreboardPacket::read(int connection_fd) {
@@ -76,12 +80,14 @@ void ShowScoreboardPacket::read(int connection_fd) {
     parser.end();
 }
 
-void ShowScoreboardPacket::send(int connection_fd) const {
+std::string ShowScoreboardPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
     encoded_stream << packetID << '\n';
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
+
+    return encoded_str;
 }
 
 void ReplyShowScoreboardPacket::read(int connection_fd) {
@@ -113,7 +119,7 @@ void ReplyShowScoreboardPacket::read(int connection_fd) {
     parser.end();
 }
 
-void ReplyShowScoreboardPacket::send(int connection_fd) const {
+std::string ReplyShowScoreboardPacket::send(int connection_fd) const {
     std::ostringstream encoded_stream;
     encoded_stream << packetID << ' ' << statusToStr(status);
     switch (status) {
@@ -130,4 +136,6 @@ void ReplyShowScoreboardPacket::send(int connection_fd) const {
     std::string encoded_str = encoded_stream.str();
 
     safe_write(connection_fd, encoded_str.c_str(), encoded_str.size());
+
+    return encoded_str;
 }

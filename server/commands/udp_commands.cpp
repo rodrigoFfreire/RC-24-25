@@ -45,6 +45,7 @@ void tryHandler(std::stringstream &packetStream, GameStore& store, Logger& logge
         std::stringstream ss;
         ss << "[Player " << request.playerID << "] > Try " << request.key << ' ';
         ss << "- nB = " << reply->blacks << ", nW = " << reply->whites;
+        ss << (reply->blacks == SECRET_KEY_LEN ? "GUESSED!" : "NOT GUESSED");
         logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const DuplicateTrialException& e) {
         reply->status = ReplyTryPacket::DUP;

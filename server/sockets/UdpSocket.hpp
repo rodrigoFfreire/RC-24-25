@@ -33,7 +33,7 @@ public:
 
     void setup();
     int receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr);
-    void sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr);
+    std::string sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr);
 
     const struct addrinfo* getSocketInfo() const;
 };

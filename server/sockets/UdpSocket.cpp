@@ -89,7 +89,7 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
     return OK;
 }
 
-void UdpSocket::sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr) {
+std::string UdpSocket::sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr) {
     socklen_t client_addrlen = sizeof(client_addr);
     std::string packetStr = replyPacket->encode();
     const char* buffer = packetStr.c_str();
@@ -101,6 +101,8 @@ void UdpSocket::sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct socka
                 client_addrlen) == -1) {
         throw ServerSendError();
     }
+
+    return packetStr;
 }
 
 const addrinfo *UdpSocket::getSocketInfo() const {

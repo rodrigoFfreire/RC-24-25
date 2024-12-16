@@ -3,11 +3,12 @@
 
 #include "Parser.hpp"
 #include <iomanip>
+#include <string>
 
 class TcpPacket {
 public:
     virtual void read(int connection_fd) = 0;
-    virtual void send(int connection_fd) const = 0;
+    virtual std::string send(int connection_fd) const = 0;
     virtual ~TcpPacket() = default;
 };
 
@@ -17,7 +18,7 @@ public:
     std::string playerID;
 
     void read(int connection_fd) override;
-    void send(int connection_fd) const override;
+    std::string send(int connection_fd) const override;
 };
 
 class ReplyShowTrialsPacket : public TcpPacket {
@@ -43,7 +44,7 @@ public:
     };
 
     void read(int connection_fd) override;
-    void send(int connection_fd) const override;
+    std::string send(int connection_fd) const override;
 };
 
 class ShowScoreboardPacket : public TcpPacket {
@@ -51,7 +52,7 @@ public:
     static constexpr const char* packetID = "SSB";
 
     void read(int connection_fd) override;
-    void send(int connection_fd) const override;
+    std::string send(int connection_fd) const override;
 };
 
 class ReplyShowScoreboardPacket : public TcpPacket {
@@ -75,7 +76,7 @@ public:
     };
     
     void read(int connection_fd) override;
-    void send(int connection_fd) const override;
+    std::string send(int connection_fd) const override;
 };
 
 class TcpErrorPacket : public TcpPacket {
@@ -83,7 +84,7 @@ public:
     static constexpr const char* packetID = "ERR";
 
     void read(int connection_fd) override {(void)connection_fd;};
-    void send(int connection_fd) const override {safe_write(connection_fd, "ERR\n", 4);};
+    std::string send(int connection_fd) const override {safe_write(connection_fd, "ERR\n", 4); return "ERR\n";};
 };
 
 #endif
