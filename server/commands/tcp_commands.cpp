@@ -32,7 +32,7 @@ void showTrialsHandler(const int fd, GameStore& store, Logger& logger, std::uniq
         reply->fdata = file_str + '\n';
 
         std::stringstream ss;
-        ss << "[Player " << request.playerID << "] > Requested to show last game. (" << reply->fsize << " Bytes)\n";
+        ss << "[Player " << request.playerID << "] > Requested to show last game. (" << reply->fsize << " Bytes)";
         logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const std::exception& e) {
         reply->status = ReplyShowTrialsPacket::NOK;
@@ -58,7 +58,7 @@ void showScoreboardHandler(const int fd, GameStore& store, Logger& logger, std::
         reply->status = ReplyShowScoreboardPacket::OK;
 
         std::stringstream ss;
-        ss << "Sending scoreboard... (" << reply->fsize << " Bytes)\n";
+        ss << "Sending scoreboard... (" << reply->fsize << " Bytes)";
         logger.log(Logger::Severity::INFO, ss.str(), true);
     } catch (const EmptyScoreboardException& e) {
         reply->status = ReplyShowScoreboardPacket::EMPTY;
