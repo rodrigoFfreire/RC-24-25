@@ -4,67 +4,67 @@
 #include "Exceptions.hpp"
 
 class InvalidPacketException : public CommonException {
-private:
-    const std::string errorMsg = "Invalid packet received";
+ private:
+  const std::string errorMsg = "Invalid packet received";
 
-public:
-    InvalidPacketException() : CommonException(errorMsg) {};
+ public:
+  InvalidPacketException() : CommonException(errorMsg) {};
 };
 
 class ErrPacketException : public CommonException {
-private:
-    const std::string errorMsg = "This request caused an error";
+ private:
+  const std::string errorMsg = "This request caused an error";
 
-public:
-    ErrPacketException() : CommonException(errorMsg) {};
+ public:
+  ErrPacketException() : CommonException(errorMsg) {};
 };
 
 class UnexpectedPacketException : public CommonException {
-private:
-    const std::string errorMsg = "Unexpected packet received";
+ private:
+  const std::string errorMsg = "Unexpected packet received";
 
-public:
-    UnexpectedPacketException() : CommonException(errorMsg) {};
+ public:
+  UnexpectedPacketException() : CommonException(errorMsg) {};
 };
 
 class PacketEncodingException : public CommonException {
-private:
-    const std::string errorMsg = "Cannot encode invalid packet data";
+ private:
+  const std::string errorMsg = "Cannot encode invalid packet data";
 
-public:
-    PacketEncodingException() : CommonException(errorMsg) {};
+ public:
+  PacketEncodingException() : CommonException(errorMsg) {};
 };
 
 class ConnectionTimeoutError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "TCP Connection timed out! ";
+ private:
+  static constexpr const char* errorMsg = "TCP Connection timed out! ";
 
-public:
-    ConnectionTimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ConnectionTimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionReadError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to receive data from peer! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to receive data from peer! ";
 
-public:
-    ConnectionReadError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ConnectionReadError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionWriteError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to send data to peer! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to send data to peer! ";
 
-public:
-    ConnectionWriteError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ConnectionWriteError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectionResetError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Peer has reset the connection! ";
+ private:
+  static constexpr const char* errorMsg = "Peer has reset the connection! ";
 
-public:
-    ConnectionResetError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ConnectionResetError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 #endif

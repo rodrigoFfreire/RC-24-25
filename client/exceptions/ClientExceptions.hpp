@@ -4,51 +4,52 @@
 #include "../../common/exceptions/Exceptions.hpp"
 
 class ClientReceiveError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Could not read data from server! ";
+ private:
+  static constexpr const char* errorMsg = "Could not read data from server! ";
 
-public:
-    ClientReceiveError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ClientReceiveError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ClientSendError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Could not send data to server! ";
+ private:
+  static constexpr const char* errorMsg = "Could not send data to server! ";
 
-public:
-    ClientSendError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ClientSendError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class ConnectTCPError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to connect to server over TCP! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to connect to server over TCP! ";
 
-public:
-    ConnectTCPError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  ConnectTCPError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class TimeoutError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to communicate with server within reasonable time! ";
+ private:
+  static constexpr const char* errorMsg =
+      "Failed to communicate with server within reasonable time! ";
 
-public:
-    TimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  TimeoutError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class SaveFileError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to save information to a file! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to save information to a file! ";
 
-public:
-    SaveFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  SaveFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 class PrintFileError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to print file information! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to print file information! ";
 
-public:
-    PrintFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
+ public:
+  PrintFileError() : CommonError(std::string(errorMsg) + std::strerror(errno)) {};
 };
 
 #endif

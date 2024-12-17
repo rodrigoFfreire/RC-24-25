@@ -1,8 +1,8 @@
 #include "Config.hpp"
 
 /// @brief Creates the client configuration object using argv
-/// @param argc 
-/// @param argv 
+/// @param argc
+/// @param argv
 Config::Config(int argc, char** argv) {
   int opt;
   fpath = std::string(argv[0]);
@@ -36,14 +36,10 @@ Config::Config(int argc, char** argv) {
 
 /// @brief Sets the target IP address
 /// @param ip_addr IP address (string format)
-void Config::setIP(const std::string& ip_addr) {
-  ipaddr = ip_addr;
-}
+void Config::setIP(const std::string& ip_addr) { ipaddr = ip_addr; }
 
 /// @brief Sets unicode mode (Renders colors with emojis)
-void Config::setUnicode() {
-  unicode = true;
-}
+void Config::setUnicode() { unicode = true; }
 
 /// @brief Sets the target Port
 /// @param port_str Port (string format)
@@ -68,6 +64,7 @@ void Config::printUsage(std::ostream& s) {
   s << "Options:" << std::endl;
   s << "\t-n <GSIP>\t Sets Game server IP address" << std::endl;
   s << "\t-p <GSport>\t Sets Game server port" << std::endl;
-  s << "\t-u\t\t Unicode mode. Uses emojis to render the colors (Recommended)" << std::endl;
+  s << "\t-u\t\t Unicode mode. Uses emojis to render the colors (Recommended)"
+    << std::endl;
   s << "\t-h\t\t Displays this usage message" << std::endl;
 }

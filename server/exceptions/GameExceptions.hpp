@@ -4,83 +4,83 @@
 #include "../../common/exceptions/Exceptions.hpp"
 
 class OngoingGameException : public CommonException {
-private:
-    const std::string errorMsg = "This player has an ongoing game!";
+ private:
+  const std::string errorMsg = "This player has an ongoing game!";
 
-public:
-    OngoingGameException() : CommonException(errorMsg) {};
+ public:
+  OngoingGameException() : CommonException(errorMsg) {};
 };
 
 class InvalidGameModeException : public CommonException {
-private:
-    const std::string errorMsg = "That gamemode is not recognized";
+ private:
+  const std::string errorMsg = "That gamemode is not recognized";
 
-public:
-    InvalidGameModeException() : CommonException(errorMsg) {};
+ public:
+  InvalidGameModeException() : CommonException(errorMsg) {};
 };
 
 class InvalidEndingException : public CommonException {
-private:
-    const std::string errorMsg = "That game ending is not recognized";
+ private:
+  const std::string errorMsg = "That game ending is not recognized";
 
-public:
-    InvalidEndingException() : CommonException(errorMsg) {};
+ public:
+  InvalidEndingException() : CommonException(errorMsg) {};
 };
 
 class UncontextualizedGameException : public CommonException {
-private:
-    const std::string errorMsg = "This player has no ongoing game!";
+ private:
+  const std::string errorMsg = "This player has no ongoing game!";
 
-public:
-    UncontextualizedGameException() : CommonException(errorMsg) {};
+ public:
+  UncontextualizedGameException() : CommonException(errorMsg) {};
 };
 
 class NeverPlayedException : public CommonException {
-private:
-    const std::string errorMsg = "This player has no registered games!";
+ private:
+  const std::string errorMsg = "This player has no registered games!";
 
-public:
-    NeverPlayedException() : CommonException(errorMsg) {};
+ public:
+  NeverPlayedException() : CommonException(errorMsg) {};
 };
 
 class EmptyScoreboardException : public CommonException {
-private:
-    const std::string errorMsg = "Scoreboard is still empty...";
+ private:
+  const std::string errorMsg = "Scoreboard is still empty...";
 
-public:
-    EmptyScoreboardException() : CommonException(errorMsg) {};
+ public:
+  EmptyScoreboardException() : CommonException(errorMsg) {};
 };
 
 class TimedoutGameException : public CommonException {
-private:
-    const std::string errorMsg = "This player has exceeded the maximum play time!";
+ private:
+  const std::string errorMsg = "This player has exceeded the maximum play time!";
 
-public:
-    TimedoutGameException() : CommonException(errorMsg) {};
+ public:
+  TimedoutGameException() : CommonException(errorMsg) {};
 };
 
 class InvalidTrialException : public CommonException {
-private:
-    const std::string errorMsg = "This player has attempted an invalid trial!";
+ private:
+  const std::string errorMsg = "This player has attempted an invalid trial!";
 
-public:
-    InvalidTrialException() : CommonException(errorMsg) {};
+ public:
+  InvalidTrialException() : CommonException(errorMsg) {};
 };
 
 class DuplicateTrialException : public CommonException {
-private:
-    const std::string errorMsg = "This player has attempted a duplicate trial!";
+ private:
+  const std::string errorMsg = "This player has attempted a duplicate trial!";
 
-public:
-    DuplicateTrialException() : CommonException(errorMsg) {};
+ public:
+  DuplicateTrialException() : CommonException(errorMsg) {};
 };
 
 class ExceededMaxTrialsException : public CommonException {
-private:
-    const std::string errorMsg = "This player has used all of their attempts!";
+ private:
+  const std::string errorMsg = "This player has used all of their attempts!";
 
-public:
-    ExceededMaxTrialsException() : CommonException(errorMsg) {};
+ public:
+  ExceededMaxTrialsException() : CommonException(errorMsg) {};
 };
 
 #endif

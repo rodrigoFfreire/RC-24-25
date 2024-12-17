@@ -1,8 +1,8 @@
 #include "Config.hpp"
 
 /// @brief Creates the server configuration object using argv
-/// @param argc 
-/// @param argv 
+/// @param argc
+/// @param argv
 Config::Config(int argc, char** argv) {
   int opt;
   this->fpath = std::string(argv[0]);
@@ -31,9 +31,7 @@ Config::Config(int argc, char** argv) {
 }
 
 /// @brief Sets verbose mode on
-void Config::setVerbose() {
-  this->verbose = true;
-}
+void Config::setVerbose() { this->verbose = true; }
 
 /// @brief Sets configured port
 /// @param port_str Port in string format

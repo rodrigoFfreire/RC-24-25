@@ -1,270 +1,266 @@
 #include "udp.hpp"
+
 #include <iomanip>
 
 /// Decode methods: Receives a packet in string format and deserializes it to an object
 /// Encode methods: Serializes a packet object into a string
 
-void StartNewGamePacket::decode(std::stringstream& packetStream) {
-    UdpParser parser(packetStream);
+void StartNewGamePacket::decode(std::stringstream &packetStream) {
+  UdpParser parser(packetStream);
 
-    parser.next();
-    playerID = parser.parsePlayerID();
-    parser.next();
-    time = parser.parseUInt();
-    if (!time || time > PLAY_TIME_MAX)
-        throw InvalidPacketException();
-    parser.end();
+  parser.next();
+  playerID = parser.parsePlayerID();
+  parser.next();
+  time = parser.parseUInt();
+  if (!time || time > PLAY_TIME_MAX) throw InvalidPacketException();
+  parser.end();
 }
 
 std::string StartNewGamePacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ' << playerID;
-    encoded_stream << ' ' << time << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ' << playerID;
+  encoded_stream << ' ' << time << '\n';
+  return encoded_stream.str();
 }
 
 void ReplyStartGamePacket::decode(std::stringstream &packetStream) {
-    UdpParser parser(packetStream);
+  UdpParser parser(packetStream);
 
-    std::string parsed_id = parser.parsePacketID();
-    if (parsed_id == UdpErrorPacket::packetID) {
-        throw ErrPacketException();
-    }
-    if (parsed_id != ReplyStartGamePacket::packetID) {
-        throw InvalidPacketException();
-    }
+  std::string parsed_id = parser.parsePacketID();
+  if (parsed_id == UdpErrorPacket::packetID) {
+    throw ErrPacketException();
+  }
+  if (parsed_id != ReplyStartGamePacket::packetID) {
+    throw InvalidPacketException();
+  }
 
-    parser.next();
+  parser.next();
 
-    std::string statusStr = parser.parseStatus();
-    if (statusStr == "OK\n") {
-        status = OK;
-        packetStream.unget();
-    } else if (statusStr == "NOK") {
-        status = NOK;
-    } else if (statusStr == "ERR") {
-        status = ERR;
-    } else {
-        throw InvalidPacketException();
-    }
-    parser.end();
+  std::string statusStr = parser.parseStatus();
+  if (statusStr == "OK\n") {
+    status = OK;
+    packetStream.unget();
+  } else if (statusStr == "NOK") {
+    status = NOK;
+  } else if (statusStr == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  parser.end();
 }
 
 std::string ReplyStartGamePacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << statusToStr(status) << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ';
+  encoded_stream << statusToStr(status) << '\n';
+  return encoded_stream.str();
 }
 
 void TryPacket::decode(std::stringstream &packetStream) {
-    key.resize(SECRET_KEY_LEN, '\0');
+  key.resize(SECRET_KEY_LEN, '\0');
 
-    UdpParser parser(packetStream);
-    parser.next();
+  UdpParser parser(packetStream);
+  parser.next();
 
-    playerID = parser.parsePlayerID();
-    parser.parseKey(key);
-    parser.next();
-    trial = parser.parseUInt();
-    parser.end();
+  playerID = parser.parsePlayerID();
+  parser.parseKey(key);
+  parser.next();
+  trial = parser.parseUInt();
+  parser.end();
 }
 
 std::string TryPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ' << playerID;
-    for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
-        encoded_stream << ' ' << key[i];
-    encoded_stream << ' ' << trial << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ' << playerID;
+  for (size_t i = 0; i < SECRET_KEY_LEN; ++i) encoded_stream << ' ' << key[i];
+  encoded_stream << ' ' << trial << '\n';
+  return encoded_stream.str();
 }
 
 void ReplyTryPacket::decode(std::stringstream &packetStream) {
-    key.resize(SECRET_KEY_LEN, '\0');
+  key.resize(SECRET_KEY_LEN, '\0');
 
-    UdpParser parser(packetStream);
+  UdpParser parser(packetStream);
 
-    std::string parsed_id = parser.parsePacketID();
-    if (parsed_id == UdpErrorPacket::packetID) {
-        throw ErrPacketException();
-    }
-    if (parsed_id != ReplyTryPacket::packetID) {
-        throw InvalidPacketException();
-    }
+  std::string parsed_id = parser.parsePacketID();
+  if (parsed_id == UdpErrorPacket::packetID) {
+    throw ErrPacketException();
+  }
+  if (parsed_id != ReplyTryPacket::packetID) {
+    throw InvalidPacketException();
+  }
 
+  parser.next();
+  std::string statusStr = parser.parseStatus();
+  if (statusStr == "OK ") {
+    status = OK;
+    trial = parser.parseUInt();
     parser.next();
-    std::string statusStr = parser.parseStatus();
-    if (statusStr == "OK ") {
-        status = OK;
-        trial = parser.parseUInt();
-        parser.next();
-        blacks = parser.parseUInt();
-        parser.next();
-        whites = parser.parseUInt();
-    } else if (statusStr == "DUP") {
-        status = DUP;
-    } else if (statusStr == "INV") {
-        status = INV;
-    } else if (statusStr == "NOK") {
-        status = NOK;
-    } else if (statusStr == "ENT") {
-        status = ENT;
-        parser.parseKey(key);
-    } else if (statusStr == "ETM") {
-        status = ETM;
-        parser.parseKey(key);
-    } else if (statusStr == "ERR") {
-        status = ERR;
-    } else {
-        throw InvalidPacketException();
-    }
-    parser.end();
+    blacks = parser.parseUInt();
+    parser.next();
+    whites = parser.parseUInt();
+  } else if (statusStr == "DUP") {
+    status = DUP;
+  } else if (statusStr == "INV") {
+    status = INV;
+  } else if (statusStr == "NOK") {
+    status = NOK;
+  } else if (statusStr == "ENT") {
+    status = ENT;
+    parser.parseKey(key);
+  } else if (statusStr == "ETM") {
+    status = ETM;
+    parser.parseKey(key);
+  } else if (statusStr == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  parser.end();
 }
 
 std::string ReplyTryPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << statusToStr(status);
-    switch (status) {
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ';
+  encoded_stream << statusToStr(status);
+  switch (status) {
     case OK:
-        encoded_stream << ' ' << trial << ' ' << blacks << ' ' << whites;
-        break;
+      encoded_stream << ' ' << trial << ' ' << blacks << ' ' << whites;
+      break;
     case ENT:
     case ETM:
-        for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
-            encoded_stream << ' ' << key[i];
-        break;
+      for (size_t i = 0; i < SECRET_KEY_LEN; ++i) encoded_stream << ' ' << key[i];
+      break;
     case DUP:
     case INV:
     case NOK:
     case ERR:
-        break;
+      break;
     default:
-        throw PacketEncodingException();
-    }
+      throw PacketEncodingException();
+  }
 
-    encoded_stream << '\n';
-    return encoded_stream.str();
+  encoded_stream << '\n';
+  return encoded_stream.str();
 }
 
-void QuitPacket::decode(std::stringstream& packetStream) {
-    UdpParser parser(packetStream);
+void QuitPacket::decode(std::stringstream &packetStream) {
+  UdpParser parser(packetStream);
 
-    parser.next();
-    playerID = parser.parsePlayerID();
-    parser.end();
+  parser.next();
+  playerID = parser.parsePlayerID();
+  parser.end();
 };
 
 std::string QuitPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ' << playerID << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ' << playerID << '\n';
+  return encoded_stream.str();
 }
 
 void ReplyQuitPacket::decode(std::stringstream &packetStream) {
-    key.resize(SECRET_KEY_LEN, '\0');
+  key.resize(SECRET_KEY_LEN, '\0');
 
-    UdpParser parser(packetStream);
+  UdpParser parser(packetStream);
 
-    std::string parsed_id = parser.parsePacketID();
-    if (parsed_id == UdpErrorPacket::packetID) {
-        throw ErrPacketException();
-    }
-    if (parsed_id != ReplyQuitPacket::packetID) {
-        throw InvalidPacketException();
-    }
+  std::string parsed_id = parser.parsePacketID();
+  if (parsed_id == UdpErrorPacket::packetID) {
+    throw ErrPacketException();
+  }
+  if (parsed_id != ReplyQuitPacket::packetID) {
+    throw InvalidPacketException();
+  }
 
-    parser.next();
-    std::string statusStr = parser.parseStatus();
-    if (statusStr == "OK ") {
-        status = OK;
-        packetStream.unget();
-        parser.parseKey(key);
-    } else if (statusStr == "NOK") {
-        status = NOK;
-    } else if (statusStr == "ERR") {
-        status = ERR;
-    } else {
-        throw InvalidPacketException();
-    }
-    parser.end();
+  parser.next();
+  std::string statusStr = parser.parseStatus();
+  if (statusStr == "OK ") {
+    status = OK;
+    packetStream.unget();
+    parser.parseKey(key);
+  } else if (statusStr == "NOK") {
+    status = NOK;
+  } else if (statusStr == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  parser.end();
 }
 
 std::string ReplyQuitPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << statusToStr(status);
-    switch (status) {
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ';
+  encoded_stream << statusToStr(status);
+  switch (status) {
     case OK:
-        for (size_t i = 0; i < SECRET_KEY_LEN; ++i)
-            encoded_stream << ' ' << key[i];
-        break;
+      for (size_t i = 0; i < SECRET_KEY_LEN; ++i) encoded_stream << ' ' << key[i];
+      break;
     case NOK:
     case ERR:
-        break;
+      break;
     default:
-        throw PacketEncodingException();
-    }
+      throw PacketEncodingException();
+  }
 
-    encoded_stream << '\n';
-    return encoded_stream.str();
+  encoded_stream << '\n';
+  return encoded_stream.str();
 }
 
 void DebugPacket::decode(std::stringstream &packetStream) {
-    key.resize(SECRET_KEY_LEN, '\0');
+  key.resize(SECRET_KEY_LEN, '\0');
 
-    UdpParser parser(packetStream);
+  UdpParser parser(packetStream);
 
-    parser.next();
-    playerID = parser.parsePlayerID();
-    parser.next();
-    time = parser.parseUInt();
-    if (!time || time > PLAY_TIME_MAX)
-        throw InvalidPacketException();
-    parser.parseKey(key);
-    parser.end();
+  parser.next();
+  playerID = parser.parsePlayerID();
+  parser.next();
+  time = parser.parseUInt();
+  if (!time || time > PLAY_TIME_MAX) throw InvalidPacketException();
+  parser.parseKey(key);
+  parser.end();
 }
 
 std::string DebugPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ' << playerID;
-    encoded_stream << ' ' << time;
-    for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
-        encoded_stream << ' ' << key[i];
-    }
-    encoded_stream << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ' << playerID;
+  encoded_stream << ' ' << time;
+  for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
+    encoded_stream << ' ' << key[i];
+  }
+  encoded_stream << '\n';
+  return encoded_stream.str();
 }
 
 void ReplyDebugPacket::decode(std::stringstream &packetStream) {
-    UdpParser parser(packetStream);
+  UdpParser parser(packetStream);
 
-    std::string parsed_id = parser.parsePacketID();
-    if (parsed_id == UdpErrorPacket::packetID) {
-        throw ErrPacketException();
-    }
-    if (parsed_id != ReplyDebugPacket::packetID) {
-        throw InvalidPacketException();
-    }
+  std::string parsed_id = parser.parsePacketID();
+  if (parsed_id == UdpErrorPacket::packetID) {
+    throw ErrPacketException();
+  }
+  if (parsed_id != ReplyDebugPacket::packetID) {
+    throw InvalidPacketException();
+  }
 
-    parser.next();
-    std::string statusStr = parser.parseStatus();
-    if (statusStr == "OK\n") {
-        status = OK;
-        packetStream.unget();
-    } else if (statusStr == "NOK") {
-        status = NOK;
-    } else if (statusStr == "ERR") {
-        status = ERR;
-    } else {
-        throw InvalidPacketException();
-    }
-    parser.end();
+  parser.next();
+  std::string statusStr = parser.parseStatus();
+  if (statusStr == "OK\n") {
+    status = OK;
+    packetStream.unget();
+  } else if (statusStr == "NOK") {
+    status = NOK;
+  } else if (statusStr == "ERR") {
+    status = ERR;
+  } else {
+    throw InvalidPacketException();
+  }
+  parser.end();
 }
 
 std::string ReplyDebugPacket::encode() const {
-    std::stringstream encoded_stream;
-    encoded_stream << packetID << ' ';
-    encoded_stream << statusToStr(status) << '\n';
-    return encoded_stream.str();
+  std::stringstream encoded_stream;
+  encoded_stream << packetID << ' ';
+  encoded_stream << statusToStr(status) << '\n';
+  return encoded_stream.str();
 }

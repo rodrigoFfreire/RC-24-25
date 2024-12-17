@@ -4,19 +4,19 @@
 #include "Exceptions.hpp"
 
 class SIGINTRegisterError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to register SIGNINT handler! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to register SIGNINT handler! ";
 
-public:
-    SIGINTRegisterError() : CommonError(std::string(errorMsg)) {};
+ public:
+  SIGINTRegisterError() : CommonError(std::string(errorMsg)) {};
 };
 
 class SIGTERMRegisterError : public CommonError {
-private:
-    static constexpr const char* errorMsg = "Failed to register SIGTERM handler! ";
+ private:
+  static constexpr const char* errorMsg = "Failed to register SIGTERM handler! ";
 
-public:
-    SIGTERMRegisterError() : CommonError(std::string(errorMsg)) {};
+ public:
+  SIGTERMRegisterError() : CommonError(std::string(errorMsg)) {};
 };
 
 #endif

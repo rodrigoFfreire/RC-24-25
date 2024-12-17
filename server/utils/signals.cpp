@@ -7,7 +7,6 @@ std::atomic<bool> terminateFlag(false);
 void sig_handler(int signal) {
   (void)signal;
   terminateFlag = true;
-
 }
 
 /// @brief Registers the above signal handler for SIGINT and SIGTERM
