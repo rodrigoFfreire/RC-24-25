@@ -23,9 +23,9 @@ Run `make` to compile the `server` and `player` binaries.
 ```
 Usage: ./GS [-p <GSport>] [-v] [-h]
 Options:
-	-p <GSport>	 Sets Game server port
-	-v		     Enables verbose mode
-	-h		     Displays this usage message
+	-p <GSport>  Sets Game server port
+	-v           Enables verbose mode
+	-h           Displays this usage message
 ```
 
 **Verbose mode**: displays the raw packets sent and received for debugging purposes. A severity-based logging feature has been added with respective color coding and timestamping for cleaner and more readable log activity.
@@ -35,7 +35,7 @@ The server utilizes both TCP and UDP protocols for handling specific commands, w
 - **UDP Requests:** Managed sequentially, as these operations are relatively inexpensive.
 - **TCP Requests:** Concurrency is handled using a fixed-size thread pool (adjustable via the `TCP_MAXCLIENTS` constant in [constants.hpp](./common/constants.hpp)). Each connection is queued and managed by an available worker thread. While the queue itself has no size limit, the `TCP_BACKLOG` constant defines the maximum number of simultaneous connection requests.
 
-Game data is stored in the `.data` directory located in the root of the project.
+Game data is stored in the `.data` directory located in the root of the project. It is created automatically by the server if it doesn't exist.
 
 The server supports graceful termination through a SIGINT (`^C`) or SIGTERM signal.
 
@@ -45,10 +45,10 @@ Socket-level timeouts are implemented and configurable through the [constants.hp
 ```
 Usage: ./player [-n <GSIP>] [-p <GSport>] [-u] [-h]
 Options:
-	-n <GSIP>	 Sets Game server IP address
-	-p <GSport>	 Sets Game server port
-	-u		     Unicode mode. Uses emojis to render the colors (Recommended)
-	-h		     Displays this usage message
+	-n <GSIP>    Sets Game server IP address
+	-p <GSport>  Sets Game server port
+	-u           Unicode mode. Uses emojis to render the colors (Recommended)
+	-h           Displays this usage message
 ```
 
 **Unicode Mode:** This feature enables the client to render the colored pegs as emojis. Be sure to activate this option when running the player if your terminal emulator supports emojis.
