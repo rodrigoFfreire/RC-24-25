@@ -3,14 +3,16 @@
 #include <algorithm>
 
 #include "GameStore.hpp"
-
 #include "exceptions/GameExceptions.hpp"
 #include "exceptions/ServerExceptions.hpp"
 #include "../common/utils.hpp"
 #include "../common/constants.hpp"
 
+
 namespace fs = std::filesystem;
 
+/// @brief Returns the string representation of a GameMode
+/// @param mode  Gamemode
 std::string gameModeToRepr(const GameMode mode) {
     switch (mode) {
     case GameMode::PLAY:
@@ -22,6 +24,8 @@ std::string gameModeToRepr(const GameMode mode) {
     }
 }
 
+/// @brief Returns the GameMode given the char representation
+/// @param c  Gamemode char
 GameMode charToGameMode(const char c) {
     switch (c) {
     case 'P':
@@ -33,6 +37,8 @@ GameMode charToGameMode(const char c) {
     }
 }
 
+/// @brief Returns the string representation of an Ending
+/// @param ending Ending
 std::string endingToRepr(const Endings ending) {
     switch (ending) {
     case Endings::LOST:
@@ -48,6 +54,8 @@ std::string endingToRepr(const Endings ending) {
     }
 }
 
+/// @brief Returns the Ending given the char representation
+/// @param c Ending char 
 Endings charToEnding(const char c) {
     switch (c) {
     case 'L':
@@ -63,24 +71,34 @@ Endings charToEnding(const char c) {
     }
 }
 
+/// @brief Attempt object constructor.
+/// @param att Attempt in string format (Ex: T: GROG 4 0 123)
 Attempt::Attempt(const std::string& att) : blacks(0), whites(0), time(0) {
     std::string prefix;
     std::istringstream stream(att);
 
-    stream >> prefix;   // "T:""
+    stream >> prefix;   // "T:"
     stream >> att_key;
     stream >> blacks;
     stream >> whites;
     stream >> time;
 }
 
-std::string Attempt::create(const std::string &att, const uint blacks, const uint whites, const time_t time) {
+/// @brief Serializes an attempt given its parameters
+/// @param key Attempt key
+/// @param blacks N blacks (On-position pegs)
+/// @param whites N whites (Off-position pegs)
+/// @param time Elapsed time
+/// @return Serialized attempt in string format
+std::string Attempt::create(const std::string &key, const uint blacks, const uint whites, const time_t time) {
     std::ostringstream att_ss;
-    att_ss << "T: " << att << ' ' << blacks << ' ' << whites << ' ' << time << '\n';
+    att_ss << "T: " << key << ' ' << blacks << ' ' << whites << ' ' << time << '\n';
 
     return att_ss.str();
 };
 
+/// @brief Parses the header of game file. (Ex: 100001 D RGBY 100 2024-12-16 19:12:36 1734376356)
+/// @param file Game file
 void Game::parseHeader(std::ifstream &file) {
     std::string header;
     std::getline(file, header);
@@ -98,14 +116,20 @@ void Game::parseHeader(std::ifstream &file) {
     mode = charToGameMode(mode_char);
 }
 
-uint Game::parseAttempts(std::ifstream &file, const std::string& att, std::string& last_att, bool& dup) {
+/// @brief Parses all attempts of a given file. Checks for duplicate attempts
+/// @param file Game file
+/// @param key The new attempt's key
+/// @param last_att Will store the last attempt's key according to the file
+/// @param dup Will indicate if the new attempt's key is duplicated
+/// @return The number of stored attempts in the file
+uint Game::parseAttempts(std::ifstream &file, const std::string& key, std::string& last_att, bool& dup) {
     std::string attempt_line;
     uint atts = 0;
     while (std::getline(file, attempt_line)) {
         if (attempt_line[0] == 'T') {
             Attempt attempt(attempt_line);
             atts++;
-            if (!att.compare(attempt.att_key)) {
+            if (!key.compare(attempt.att_key)) {
                 dup = true;
             }
             last_att = attempt.att_key;
@@ -114,6 +138,8 @@ uint Game::parseAttempts(std::ifstream &file, const std::string& att, std::strin
     return atts;
 }
 
+/// @brief Parses an entire Game file
+/// @param file Game file 
 void Game::parseGame(std::ifstream &file) {
     std::string attempt_line;
     parseHeader(file);
@@ -136,6 +162,13 @@ void Game::parseGame(std::ifstream &file) {
     }
 }
 
+/// @brief Creates a serialized game header
+/// @param plid Player ID
+/// @param playTime Maximum play time
+/// @param mode Gamemode (Play | Debug)
+/// @param cmd_tstamp Timestamp of created game
+/// @param key Secret key
+/// @return The new game's header in string format
 std::string Game::create(const std::string &plid, const uint playTime, const GameMode mode, const time_t &cmd_tstamp, const std::string& key) {
     std::ostringstream header_ss;
 
@@ -149,6 +182,8 @@ std::string Game::create(const std::string &plid, const uint playTime, const Gam
     return header_ss.str();
 }
 
+/// @brief Uses /dev/urandom to generate a random secret key
+/// @return Secret key
 std::string GameStore::generateKey() {
     std::string key(SECRET_KEY_LEN, '\0');
     size_t valid_chars_len = strlen(VALID_COLORS);
@@ -171,29 +206,41 @@ std::string GameStore::generateKey() {
     return key;
 }
 
+/// @brief Calculates the on-position and off-position pegs of a given attempt
+/// @param key Game secret key
+/// @param att Attempt key
+/// @param whites N Off-position pegs  
+/// @param blacks N On-position pegs
 void GameStore::calculateAttempt(const std::string &key, const std::string &att, uint &whites, uint &blacks) {
     const std::string valid_colors = VALID_COLORS;
 
     uint key_count[VALID_COLORS_LEN] = {0};
     uint attempt_count[VALID_COLORS_LEN] = {0};
 
-    // First pass: Count black pegs and build frequency arrays
     for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
         if (key[i] == att[i]) {
+            // Count on-position pegs
             blacks++;
         } else {
-            // Increment the frequency of unmatched colors
+            // Increment frequency of off-position colors
             key_count[valid_colors.find(key[i])]++;
             attempt_count[valid_colors.find(att[i])]++;
         }
     }
 
-    // Second pass: Count white pegs
+    // Count off-position pegs
     for (size_t i = 0; i < valid_colors.size(); i++) {
         whites += (key_count[i] < attempt_count[i]) ? key_count[i] : attempt_count[i];
     }
 }
 
+/// @brief Calculates the score of a won game, and saves it to the SCORES directory
+/// @param plid Player ID
+/// @param key Secret key
+/// @param mode Game mode
+/// @param win_tstamp Timestamp of win
+/// @param used_atts N used attempts
+/// @param used_time used time (seconds)
 void GameStore::saveGameScore(const std::string &plid, const std::string& key, const GameMode mode, const time_t &win_tstamp, const int used_atts, const int used_time) {
     std::ostringstream score_fname;
     std::ostringstream score_header;
@@ -221,6 +268,8 @@ void GameStore::saveGameScore(const std::string &plid, const std::string& key, c
     }
 }
 
+/// @brief Initializes the required directories for the database
+/// @param dir 
 GameStore::GameStore(const std::string &dir) {
     storeDir = fs::current_path() / dir;
 
@@ -229,7 +278,12 @@ GameStore::GameStore(const std::string &dir) {
     fs::create_directory(storeDir / "SCORES");
 }
 
-int GameStore::updateGameTime(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key) {
+/// @brief Checks if a given player already has an open game, and closes it if ended already
+/// @param plid Player ID
+/// @param cmd_tstamp Command activation timestamp
+/// @param revealed_key If necessary updated this pointer with the secret key
+/// @return `-1`: No active game;   `-2`: Game ended by timeout;    Else: remaining time to play (seconds)
+int GameStore::checkTimedoutGame(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key) {
     std::string game_fname = "GAME_" + plid + ".txt";
     fs::path game_path = storeDir / "GAMES" / game_fname;
 
@@ -263,8 +317,15 @@ int GameStore::updateGameTime(const std::string& plid, const time_t& cmd_tstamp,
     }
 }
 
+/// @brief Creates a new game entry given the arguments
+/// @param plid Player ID
+/// @param cmd_tstamp Command activation timestamp
+/// @param playTime Max time allowed to play
+/// @param key Secret key
+/// @return Returns the secret key. (Used for logging purposes)
 std::string GameStore::createGame(const std::string& plid, const time_t& cmd_tstamp, const uint playTime, std::string* key) {
-    if (updateGameTime(plid, cmd_tstamp, nullptr) > 0) {
+    // Active game exists
+    if (checkTimedoutGame(plid, cmd_tstamp, nullptr) > 0) {
         throw OngoingGameException();
     }
 
@@ -296,8 +357,13 @@ std::string GameStore::createGame(const std::string& plid, const time_t& cmd_tst
     return new_key;
 }
 
+/// @brief Quits the game
+/// @param plid Player ID
+/// @param cmd_tstamp Command activation timestamp
+/// @return Revealed secret key
 std::string GameStore::quitGame(const std::string &plid, const time_t &cmd_tstamp) {
-    if (updateGameTime(plid, cmd_tstamp, nullptr) < 0) {
+    // No ongoing game
+    if (checkTimedoutGame(plid, cmd_tstamp, nullptr) < 0) {
         throw UncontextualizedGameException();
     }
 
@@ -322,12 +388,17 @@ std::string GameStore::quitGame(const std::string &plid, const time_t &cmd_tstam
     return game.key;
 }
 
+/// @brief Retrieves the last game (active/finished) and creates a formatted file with all information about it
+/// @param plid Player ID
+/// @param cmd_tstamp Command activation timestamp
+/// @param output Output file containing all information about the game
+/// @return Game status (Active | Finished)
 Game::Status GameStore::getLastGame(const std::string &plid, const time_t &cmd_tstamp, std::string &output) {
     Game game;
     fs::path game_path;
     std::ostringstream output_ss;
 
-    if (updateGameTime(plid, cmd_tstamp, NULL) < 0) {
+    if (checkTimedoutGame(plid, cmd_tstamp, NULL) < 0) {
         game_path = storeDir / "GAMES" / plid / findLastFinishedGame(plid);
         game.status = Game::Status::FIN;
     } else {
@@ -386,6 +457,8 @@ Game::Status GameStore::getLastGame(const std::string &plid, const time_t &cmd_t
     return game.status;
 }
 
+/// @brief Retrieves the TOP N scores from the SCORES dir and creates a formatted scoreboard
+/// @return Scoreboard output
 std::string GameStore::getScoreboard() {
     fs::path scores_path = storeDir / "SCORES";
     std::vector<fs::path> score_paths;
@@ -406,6 +479,7 @@ std::string GameStore::getScoreboard() {
             throw EmptyScoreboardException();
         }
 
+        // Sorts the files in alphabetical descending order
         std::sort(score_paths.begin(), score_paths.end(), std::greater<>());
 
         for (size_t i = 0; i < score_paths.size() && i < SCOREBOARD_MAX_ENTRIES; ++i) {
@@ -425,8 +499,17 @@ std::string GameStore::getScoreboard() {
     return output_ss.str();
 }
 
+/// @brief Registers an attempt to an ongoing game
+/// @param plid Player ID
+/// @param cmd_tstamp Command activation timestamp
+/// @param att Attempt's key
+/// @param trial Trial number
+/// @param blacks Will store the N of on-position pegs
+/// @param whites Will store the N of off-position pegs
+/// @param real_key Will store the game's key
+/// @return The received trial number + 1
 uint GameStore::attempt(const std::string &plid, const time_t& cmd_tstamp, const std::string& att, const uint trial, uint &blacks, uint &whites, std::string& real_key) {
-    int err = updateGameTime(plid, cmd_tstamp, &real_key);
+    int err = checkTimedoutGame(plid, cmd_tstamp, &real_key);
     if (err == -1) {
         throw UncontextualizedGameException();
     } else if (err == -2) {
@@ -489,6 +572,12 @@ uint GameStore::attempt(const std::string &plid, const time_t& cmd_tstamp, const
     return ++num_attempts;
 }
 
+/// @brief Ends the game with a given reason
+/// @param plid Player ID
+/// @param reason Ending reason (WIN, LOSS, QUIT, TIMEOUT)
+/// @param tstamp Command activation timestamp
+/// @param file Opened target game file
+/// @param used_time Total used time for this game (seconds)
 void GameStore::endGame(const std::string& plid, const Endings reason, const time_t& tstamp, std::ofstream& file, const int used_time) {
     std::ostringstream ss;
     formatTimestamp(ss, &tstamp, TSTAMP_DATE_TIME_PRETTY);
@@ -507,6 +596,7 @@ void GameStore::endGame(const std::string& plid, const Endings reason, const tim
     fs::path finished_path = storeDir / "GAMES" / plid / finished_fname.str();
 
     try {
+        // Create PLID directory and store the finished game there
         fs::create_directories(finished_path.parent_path());
 
         fs::rename(game_path, finished_path);        
@@ -515,6 +605,9 @@ void GameStore::endGame(const std::string& plid, const Endings reason, const tim
     }
 }
 
+/// @brief Finds the last finished game of a given player
+/// @param plid Player ID
+/// @return The target game file name
 std::string GameStore::findLastFinishedGame(const std::string &plid) {
     fs::path dir = storeDir / "GAMES" / plid;
     std::vector<std::string> filenames;
@@ -542,6 +635,8 @@ std::string GameStore::findLastFinishedGame(const std::string &plid) {
     return filenames[0];
 }
 
+/// @brief Leaderboard entry object constructor
+/// @param file Score file
 LeaderboardEntry::LeaderboardEntry(std::ifstream& file) {
     char mode_char;
 

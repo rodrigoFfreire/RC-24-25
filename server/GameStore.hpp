@@ -33,7 +33,7 @@ public:
     uint time;
 
     Attempt(const std::string& att);
-    static std::string create(const std::string& att, const uint blacks, const uint whites, const time_t time);
+    static std::string create(const std::string& key, const uint blacks, const uint whites, const time_t time);
 };
 
 class Game {
@@ -57,7 +57,7 @@ public:
 
     void parseGame(std::ifstream& file);
     void parseHeader(std::ifstream& file);
-    uint parseAttempts(std::ifstream& file, const std::string& att, std::string& last_att, bool& dup);
+    uint parseAttempts(std::ifstream& file, const std::string& key, std::string& last_att, bool& dup);
     static std::string create(const std::string& plid, const uint playTime, const GameMode mode, const time_t& cmd_tstamp, const std::string& key);
 };
 
@@ -65,7 +65,7 @@ class GameStore {
 private:
     std::filesystem::path storeDir;
 
-    int updateGameTime(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key);
+    int checkTimedoutGame(const std::string& plid, const time_t& cmd_tstamp, std::string* revealed_key);
     void calculateAttempt(const std::string& key, const std::string& att, uint& whites, uint& blacks);
     void saveGameScore(const std::string &plid, const std::string& key, const GameMode mode, const time_t &win_tstamp, const int used_atts, const int used_time);
     void endGame(const std::string& plid, const Endings reason, const time_t& tstamp, std::ofstream& file, const int play_time);

@@ -1,7 +1,6 @@
 #include <atomic>
 
 #include "Server.hpp"
-
 #include "commands/udp_commands.hpp"
 #include "commands/tcp_commands.hpp"
 #include "../common/constants.hpp"
@@ -10,33 +9,39 @@
 
 extern std::atomic<bool> terminateFlag;
 
+/// @brief Server object constructor
+/// @param config Configuration settings. (Ex: IP, Port, verbose, data directory)
+/// @param logger Logger object used for logging server events
 Server::Server(Config& config, Logger& logger) 
     : _port(config.port), _udpSocket(_port), _tcpSocket(_port), logger(logger), store(config.dataPath) {
     registerCommands();
 };
 
+/// @brief Calls the socket's setup method and logs the bound address
 void Server::setupUdp() {
     char ipstr[INET_ADDRSTRLEN];
     std::ostringstream log_msg;
     
     _udpSocket.setup();
 
+    // Log address and port of bound socket
     const addrinfo* info = _udpSocket.getSocketInfo();
     struct sockaddr_in *udp_addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
     inet_ntop(info->ai_family, &udp_addr->sin_addr, ipstr, sizeof(ipstr));
-    log_msg << "UDP socket binded to " << ipstr << ":" << _port;
+    log_msg << "UDP socket bound to " << ipstr << ":" << _port;
 
     logger.log(Logger::Severity::INFO, log_msg.str(), true);
-
 }
 
+/// @brief Calls the socket's setup method, creates the TCP workers threads and logs the bound address
 void Server::setupTcp() {
     char ipstr[INET_ADDRSTRLEN];
     std::ostringstream log_msg;
     
     _tcpSocket.setup();
-    _tcpPool.dispatch(TCP_MAXCLIENTS);
+    _tcpPool.dispatch(TCP_MAXCLIENTS);  // Dispatch TCP worker threads
 
+    // Log address and port of bound socket
     const addrinfo* info = _tcpSocket.getSocketInfo();
     struct sockaddr_in *tcp_addr = reinterpret_cast<sockaddr_in*>(info->ai_addr);
     inet_ntop(info->ai_family, &tcp_addr->sin_addr, ipstr, sizeof(ipstr));
@@ -46,18 +51,23 @@ void Server::setupTcp() {
 
 }
 
+/// @brief Registers command handlers
 void Server::registerCommands() {
-    // Udp commands
+    // UDP commands
     _udp_handlers.insert({StartNewGamePacket::packetID, startNewGameHandler});
     _udp_handlers.insert({TryPacket::packetID, tryHandler});
     _udp_handlers.insert({QuitPacket::packetID, quitHandler});
     _udp_handlers.insert({DebugPacket::packetID, debugGameHandler});
 
-    // Tcp commands
+    // TCP commands
     _tcp_handlers.insert({ShowTrialsPacket::packetID, showTrialsHandler});
     _tcp_handlers.insert({ShowScoreboardPacket::packetID, showScoreboardHandler});
 }
 
+/// @brief Handles an UDP command
+/// @param packetId Identifies the command. Ex: (`SNG`, `TRY`, ...)
+/// @param packetStream The received packet as a `std::stringstream`
+/// @param replyPacket A pointer to the created reply packet
 void Server::handleUdpCommand(const std::string& packetId, std::stringstream& packetStream, std::unique_ptr<UdpPacket>& replyPacket) {
     auto it = _udp_handlers.find(packetId);
     if (it == _udp_handlers.end()) {
@@ -67,6 +77,10 @@ void Server::handleUdpCommand(const std::string& packetId, std::stringstream& pa
     it->second(packetStream, store, logger, replyPacket);
 }
 
+/// @brief Handles a TCP command
+/// @param packetId Identifies the command. Ex: (`SNG`, `TRY`, ...)
+/// @param conn_fd The established connection's socket file descriptor
+/// @param replyPacket A pointer to the created reply packet
 void Server::handleTcpCommand(const std::string &packetId, const int conn_fd, std::unique_ptr<TcpPacket> &replyPacket) {
     auto it = _tcp_handlers.find(packetId);
     if (it == _tcp_handlers.end()) {
@@ -76,6 +90,7 @@ void Server::handleTcpCommand(const std::string &packetId, const int conn_fd, st
     it->second(conn_fd, store, logger, replyPacket);
 }
 
+/// @brief Runs the UDP listener loop
 void Server::runUdp() {
     while (!terminateFlag.load()) {
         struct sockaddr_in client_addr;
@@ -135,6 +150,7 @@ void Server::runUdp() {
             logger.log(Logger::Severity::ERROR, e.what(), true);
         }
 
+        // Log response (verbose)
         if (!response.empty()) {
             std::ostringstream log_msg;
             log_msg << "(UDP) " << '\"' << response << '\"';
@@ -145,12 +161,14 @@ void Server::runUdp() {
     logger.log(Logger::Severity::INFO, "UDP monitor terminated!", true);
 }
 
+/// @brief Runs the TCP listener loop
 void Server::runTcp() {
     while (!terminateFlag.load()) {
         struct sockaddr_in client_addr;
         int conn_fd = -1;
 
         try {
+            // Accept TCP connection
             int err = _tcpSocket.acceptConnection(conn_fd, client_addr);
             if (err == TcpSocket::TIMEOUT)
                 continue;
@@ -179,6 +197,10 @@ void Server::runTcp() {
     logger.log(Logger::Severity::INFO, "TCP monitor terminated! Closing worker threads...", true);
 }
 
+/// @brief Ran by a worker thread, handles a TCP connection
+/// @param conn_fd The established connection's socket file descriptor
+/// @param client_addrstr Client's IP address (string format XXX.XXX.XXX.XXX)
+/// @param client_addr Client's address information
 void Server::handleTcpConnection(const int conn_fd, const char *client_addrstr, const sockaddr_in& client_addr) {
     std::unique_ptr<TcpPacket> replyPacket = nullptr;
     std::string response;
@@ -214,6 +236,7 @@ void Server::handleTcpConnection(const int conn_fd, const char *client_addrstr, 
         logger.log(Logger::Severity::ERROR, e.what(), true);
     }
 
+    // Log response (verbose)
     if (!response.empty()) {
         std::ostringstream log_msg;
         log_msg << "(TCP) " << response << " > [ " << client_addrstr << ":" << ntohs(client_addr.sin_port) << "]";
@@ -222,8 +245,4 @@ void Server::handleTcpConnection(const int conn_fd, const char *client_addrstr, 
 
     close(conn_fd);
     return;
-}
-
-std::time_t Server::getCommandTime() {
-    return std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
 }

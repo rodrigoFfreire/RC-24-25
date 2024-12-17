@@ -5,10 +5,12 @@
 #include "utils/Config.hpp"
 #include "../common/Logger.hpp"
 
+
 int main(int argc, char **argv) {
     Logger logger;
 
     try {
+        // Obtain server configuration from argv
         Config config(argc, argv);
         if (config.help) {
             return EXIT_SUCCESS;
@@ -17,13 +19,16 @@ int main(int argc, char **argv) {
 
         register_signal_handler();
 
+        // Create server, setup sockets
         Server server(config, logger);
         server.setupUdp();
         server.setupTcp();
 
+        // Run each listener in separate threads
         std::thread udpThread(&Server::runUdp, &server);
         std::thread tcpThread(&Server::runTcp, &server);
 
+        // Waits for these threads to finish
         udpThread.join();
         tcpThread.join();
     } catch (const std::exception& e) {
