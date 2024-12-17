@@ -25,8 +25,8 @@
 
 // Server TCP settings
 #define SOCK_BUFFER_SIZE 32
-#define TCP_BACKLOG 5
-#define TCP_MAXCLIENTS 5
+#define TCP_BACKLOG 50
+#define TCP_MAXCLIENTS 20
 #define TCP_CONN_RECV_TIMEOUT 5
 #define TCP_CONN_SEND_TIMEOUT 5
 
