@@ -4,6 +4,7 @@
 #include "commands/udp_commands.hpp"
 #include "commands/tcp_commands.hpp"
 
+/// @brief Registers the client's command handlers
 void Client::registerCommands() {
     udp_handlers.insert({"start", startNewGameHandler});
     udp_handlers.insert({"try", tryHandler});
@@ -16,6 +17,9 @@ void Client::registerCommands() {
     tcp_handlers.insert({"sb", showScoreboardHandler});
 }
 
+/// @brief Calls the correct command handlers for TCP and UDP commands
+/// @param command_id Command ID
+/// @param command_stream Stream containing the command
 void Client::handleCommand(std::string& command_id, std::stringstream& command_stream) {
     auto udp_cmd = udp_handlers.find(command_id);
     if (udp_cmd != udp_handlers.end()) {
@@ -32,6 +36,8 @@ void Client::handleCommand(std::string& command_id, std::stringstream& command_s
     throw UnexpectedCommandException();
 }
 
+/// @brief Client constructor. Creates the udp socket and registers the commands
+/// @param config 
 Client::Client(Config &config)
     : tcp_socket(config.ipaddr, config.port), udp_socket(config.ipaddr, config.port),
         game_state(config.unicode), unicode(config.unicode) {
@@ -39,6 +45,7 @@ Client::Client(Config &config)
     udp_socket.setup();
 }
 
+/// @brief Waits for the next user command
 void Client::getNextCommand() {
     try {
         std::string line;
@@ -56,9 +63,11 @@ void Client::getNextCommand() {
         std::string command_id;
         command_stream >> command_id;
 
+        // converts the command id to lowercase
         std::transform(command_id.begin(), command_id.end(), command_id.begin(),
                    [](unsigned char c) { return std::tolower(c); });
 
+        // Exit command; Quits if game is active
         if (command_id == "exit") {
             exit = true;
             if (game_state.isGame())
@@ -77,6 +86,7 @@ void Client::getNextCommand() {
     }
 }
 
+/// @brief Shows how to play the game
 void Client::printHelp() {
     std::cout << "\033[2J\033[H";
     std::cout << "\

@@ -2,6 +2,7 @@
 
 std::unordered_map<char, std::string> colorMap;
 
+/// @brief Color char to colored character or emoji (if unicode mode is set)
 void GameState::registerColorMap() {
     if (_unicode) {
         colorMap['R'] = "🔴";
@@ -24,6 +25,10 @@ void GameState::registerColorMap() {
     }
 }
 
+/// @brief Keeps track of a newly start game
+/// @param id  
+/// @param key 
+/// @param debug 
 void GameState::startGame(std::string& id, std::string* key, bool debug) {
     plid = id;
     trial = 1;
