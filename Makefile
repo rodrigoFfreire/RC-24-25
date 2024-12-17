@@ -29,8 +29,8 @@ clean-server:
 	@$(RM) $(SERVER_TARGET)
 
 clean-db:
-	@$(RM) ./$(DB_DIR)/GAMES/*
-	@$(RM) ./$(DB_DIR)/SCORES/*
+	@$(RM) -rf ./$(DB_DIR)/GAMES/*
+	@$(RM) -rf ./$(DB_DIR)/SCORES/*
 
 clean: clean-client clean-server clean-db
 
