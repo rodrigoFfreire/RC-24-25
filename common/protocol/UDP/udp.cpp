@@ -1,6 +1,9 @@
 #include "udp.hpp"
 #include <iomanip>
 
+/// Decode methods: Receives a packet in string format and deserializes it to an object
+/// Encode methods: Serializes a packet object into a string
+
 void StartNewGamePacket::decode(std::stringstream& packetStream) {
     UdpParser parser(packetStream);
 

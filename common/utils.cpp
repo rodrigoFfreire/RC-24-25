@@ -1,5 +1,11 @@
 #include "utils.hpp"
 
+
+/// @brief Safely reads from a TCP connection until all expected data is read
+/// @param fd Connection file descriptor
+/// @param buffer Read buffer
+/// @param n size to read
+/// @return Completed bytes
 ssize_t safe_read(int fd, char* buffer, size_t n) {
     ssize_t completed_bytes = 0;
 
@@ -24,6 +30,11 @@ ssize_t safe_read(int fd, char* buffer, size_t n) {
     return completed_bytes;
 }
 
+/// @brief Safely writes to a TCP connection until all expected data is written
+/// @param fd Connection file descriptor
+/// @param buffer data buffer
+/// @param n size to write
+/// @return Completed bytes
 ssize_t safe_write(int fd, const char* buffer, size_t n) {
   ssize_t completed_bytes = 0;
 
@@ -48,6 +59,10 @@ ssize_t safe_write(int fd, const char* buffer, size_t n) {
   return completed_bytes;
 }
 
+/// @brief Formats a timestamp as date and time into a stringstream
+/// @param ss Stringstream
+/// @param tstamp timestamp
+/// @param format formatting string (i.e: "%Y-%m-%d %HH:%MM:%SS")
 void formatTimestamp(std::ostringstream& ss, const time_t* tstamp, const std::string &format) {
   std::tm* timeInfo;
   

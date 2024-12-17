@@ -25,7 +25,6 @@ public:
     std::string parseStatus();
     std::string parsePlayerID();
     unsigned int parseUInt();
-    char parseChar();
     void parseKey(std::string& key);
 };
 

@@ -1,5 +1,7 @@
 #include "Parser.hpp"
 
+/// @brief Parses a fixed size string and returns it
+/// @param size expected size
 std::string UdpParser::parseFixedString(ulong size) {
     std::string buffer(size, '\0');
     char* data = buffer.data();
@@ -12,6 +14,8 @@ std::string UdpParser::parseFixedString(ulong size) {
     return std::string(data);
 }
 
+/// @brief Parses a fixed size numeric string and returns it
+/// @param size expected size (number of digits)
 std::string UdpParser::parseFixedDigitString(ulong size) {
     std::string str(size, '\0');
     for (ulong i = 0; i < size; ++i) {
@@ -25,6 +29,8 @@ std::string UdpParser::parseFixedDigitString(ulong size) {
     return str;
 }
 
+/// @brief Confirms if the next character in the stream is equal to `c`
+/// @param c 
 void UdpParser::checkNextChar(const char c) {
     char next;
     packetStream >> next;
@@ -34,6 +40,7 @@ void UdpParser::checkNextChar(const char c) {
     return;
 }
 
+/// @brief Parses a color character and returns it
 char UdpParser::parseColorChar() {
     std::string colors = VALID_COLORS;
     char next;
@@ -44,6 +51,7 @@ char UdpParser::parseColorChar() {
     return next;
 }
 
+/// @brief Parses an unsigned int value and returns it
 unsigned int UdpParser::parseUInt() {
     long n;
     packetStream >> n;
@@ -53,10 +61,12 @@ unsigned int UdpParser::parseUInt() {
     return static_cast<unsigned int>(n);
 }
 
+/// @brief Confirms the next character is the argument delimeter (' ')
 void UdpParser::next() {
     checkNextChar(' ');
 }
 
+/// @brief Confirms the next character is the end packet character ('\n')
 void UdpParser::end() {
     checkNextChar('\n');
     char a = -1;
@@ -66,14 +76,17 @@ void UdpParser::end() {
     }
 }
 
+/// @brief Parses the Packet ID 
 std::string UdpParser::parsePacketID() {
     return parseFixedString(PACKET_ID_LEN);
 }
 
+/// @brief Parses a packet status (3 chars)
 std::string UdpParser::parseStatus() {
     return parseFixedString(STATUS_CODE_LEN);
 }
 
+/// @brief Parses a player ID 
 std::string UdpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLID_LEN);
     try {
@@ -87,15 +100,8 @@ std::string UdpParser::parsePlayerID() {
     }
 }
 
-char UdpParser::parseChar() {
-    char next;
-    packetStream >> next;
-    if (!packetStream) {
-        throw InvalidPacketException();
-    }
-    return next;
-}
-
+/// @brief Parses an attempt key
+/// @param key Stores the parsed key here
 void UdpParser::parseKey(std::string& key) {
     for (size_t i = 0; i < SECRET_KEY_LEN; ++i) {
         this->next();

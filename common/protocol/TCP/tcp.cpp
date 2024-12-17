@@ -1,6 +1,9 @@
 #include "tcp.hpp"
 #include <iostream>
 
+/// Read methods: Reads an incoming TCP packet and deserializes it to an object
+/// Send methods: Writes the serialized packet object to the connection
+
 void ShowTrialsPacket::read(int connection_fd) {
     playerID.resize(PLID_LEN, '\0');
 

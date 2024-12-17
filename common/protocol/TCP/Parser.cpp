@@ -1,6 +1,8 @@
 #include "./Parser.hpp"
 #include "Parser.hpp"
 
+/// @brief Parses a fixed size string and returns it
+/// @param size expected size
 std::string TcpParser::parseFixedString(size_t size) {
     std::string buffer(size, '\0');
 
@@ -8,6 +10,8 @@ std::string TcpParser::parseFixedString(size_t size) {
     return buffer;
 }
 
+/// @brief Parses a fixed size numeric string and returns it
+/// @param size expected size (number of digits)
 std::string TcpParser::parseFixedDigitString(size_t size) {
     std::string buffer(size, '\0');
 
@@ -22,6 +26,9 @@ std::string TcpParser::parseFixedDigitString(size_t size) {
     return buffer;
 }
 
+/// @brief Parses a variable string with max size and end character delimeter
+/// @param max_size string max size
+/// @param end end delimiter
 std::string TcpParser::parseVariableString(size_t max_size, char end) {
     size_t completed_bytes = 0;
     std::string buffer(max_size, '\0');
@@ -31,7 +38,7 @@ std::string TcpParser::parseVariableString(size_t max_size, char end) {
 
         if (std::isspace(buffer[completed_bytes])) {
             if (buffer[completed_bytes] != end) {
-                throw InvalidPacketException();
+                throw InvalidPacketException();     // End delimiter was not present
             }
             buffer[completed_bytes] = '\0';
             break;
@@ -44,6 +51,8 @@ std::string TcpParser::parseVariableString(size_t max_size, char end) {
     return buffer;
 }
 
+/// @brief Confirms if the next character in the stream is equal to `c`
+/// @param c 
 void TcpParser::checkNextChar(const char c) {
     char _c;
     safe_read(connection_fd, &_c, sizeof(char));
@@ -53,26 +62,32 @@ void TcpParser::checkNextChar(const char c) {
     }
 }
 
+/// @brief Parses a filename and returns it
 std::string TcpParser::parseFileName() {
     return parseVariableString(FNAME_MAX, ' ');
 }
 
+/// @brief Confirms the next character is the argument delimeter (' ')
 void TcpParser::next() {
     checkNextChar(' ');
 }
 
+/// @brief Confirms the next character is the end packet character ('\n')
 void TcpParser::end() {
     checkNextChar('\n');
 }
 
+/// @brief Parses the Packet ID 
 std::string TcpParser::parsePacketID() {
     return parseFixedString(PACKET_ID_LEN);
 }
 
+/// @brief Parses a packet status (3 chars)
 std::string TcpParser::parseStatus() {
     return parseFixedString(STATUS_CODE_LEN);
 }
 
+/// @brief Parses a player ID 
 std::string TcpParser::parsePlayerID() {
     std::string plID_str = parseFixedDigitString(PLID_LEN);
     try {
@@ -86,6 +101,7 @@ std::string TcpParser::parsePlayerID() {
     }
 }
 
+/// @brief Parses the file size argument and returns it
 unsigned short TcpParser::parseFileSize() {
     std::string filesize_str = parseVariableString(FSIZE_STR_MAX, ' ');
 
@@ -103,6 +119,9 @@ unsigned short TcpParser::parseFileSize() {
     }
 }
 
+/// @brief Parses a file given its size
+/// @param file_size Expected file size
+/// @return Parsed file in string format
 std::string TcpParser::parseFile(unsigned short file_size) {
     char buffer[FSIZE_MAX];
 
