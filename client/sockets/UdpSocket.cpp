@@ -2,6 +2,7 @@
 
 extern volatile std::sig_atomic_t terminate_flag;
 
+/// @brief Opens a new UDP socket
 void UdpSocket::createSocket() {
     if (socket_fd != -1) {
         throw SocketAlreadyCreatedError();
@@ -36,6 +37,7 @@ void UdpSocket::createSocket() {
     }
 }
 
+/// @brief UdpSocket Destructor - Closes the socket
 UdpSocket::~UdpSocket() {
     if (socket_fd != -1) {
         close(socket_fd);
@@ -43,6 +45,7 @@ UdpSocket::~UdpSocket() {
     }
 }
 
+/// @brief Resolves an usable address for the socket to connect to
 void UdpSocket::resolveSocket() {
     int gai_err;
     struct addrinfo hints;
@@ -60,12 +63,15 @@ void UdpSocket::resolveSocket() {
     server_addr.reset(raw_addrinfo);
 }
 
+/// @brief Sets up the client's UDP socket
 void UdpSocket::setup() {
     resolveSocket();
     createSocket();
 }
 
-int UdpSocket::receivePacket(std::stringstream& packetStream) {
+/// @brief Receives a UDP packet
+/// @param packetStream Serialized packet stream
+void UdpSocket::receivePacket(std::stringstream& packetStream) {
     char buffer[SOCK_BUFFER_SIZE];
     ssize_t received_bytes;
     socklen_t server_addrlen = sizeof(server_addr);
@@ -84,10 +90,11 @@ int UdpSocket::receivePacket(std::stringstream& packetStream) {
         throw ClientReceiveError();
     }
     packetStream.write(buffer, received_bytes);
-    return OK;
 }
 
-int UdpSocket::sendPacket(UdpPacket *packet) {
+/// @brief Sends a UDP packet
+/// @param packet UDP Packet object to be sent
+void UdpSocket::sendPacket(UdpPacket *packet) {
     std::string packetStr = packet->encode();
     const char* buffer = packetStr.c_str();
     if (sendto(socket_fd,
@@ -101,9 +108,4 @@ int UdpSocket::sendPacket(UdpPacket *packet) {
         }
         throw ClientSendError();
     }
-    return OK;
-}
-
-const addrinfo *UdpSocket::getSocketInfo() const {
-    return server_addr.get();
 }

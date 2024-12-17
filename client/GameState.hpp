@@ -15,7 +15,7 @@ class GameState {
 private:
     bool _isGame;
     bool _finished;
-    bool _debug;
+    bool _debug = false;
     bool _unicode;
     unsigned int trial;
     std::string plid;
@@ -34,7 +34,7 @@ public:
     enum Events { LOST_TIME, LOST_MAXTRIALS, WON, QUIT };
 
     bool isGame() {return _isGame;};
-    void startGame(std::string& plid, std::string* key, bool debug);
+    void startGame(std::string& plid, std::string* key);
     void endGame(std::string& key, Events event);
     std::string getPlid();
     unsigned int newAttempt();

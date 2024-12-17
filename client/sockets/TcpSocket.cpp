@@ -2,6 +2,7 @@
 
 extern volatile std::sig_atomic_t terminate_flag;
 
+/// @brief Opens a new TCP socket
 void TcpSocket::createSocket() {
     if (socket_fd != -1) {
         throw SocketAlreadyCreatedError();
@@ -35,10 +36,12 @@ void TcpSocket::createSocket() {
     }
 }
 
+/// @brief TcpSocket Destructor - Closes the socket
 TcpSocket::~TcpSocket() {
     end();
 }
 
+/// @brief Closes the TCP socket
 void TcpSocket::end() {
     if (socket_fd != -1) {
         close(socket_fd);
@@ -46,6 +49,7 @@ void TcpSocket::end() {
     }
 }
 
+/// @brief Resolves an usable address for the socket to connect to
 void TcpSocket::resolveSocket() {
     int gai_err;
     struct addrinfo hints;
@@ -63,6 +67,7 @@ void TcpSocket::resolveSocket() {
     socket_addr.reset(raw_addrinfo);
 }
 
+/// @brief Sets up the TCP socket and attempts to connect to the server
 void TcpSocket::setup() {
     resolveSocket();
     createSocket();
@@ -71,6 +76,8 @@ void TcpSocket::setup() {
     }
 }
 
+/// @brief Receives a TCP packet
+/// @param packet Packet to receive
 void TcpSocket::receivePacket(TcpPacket *packet) {
     if (packet == nullptr)
         return;
@@ -78,13 +85,11 @@ void TcpSocket::receivePacket(TcpPacket *packet) {
     packet->read(socket_fd);
 }
 
+/// @brief Sends a TCP packet
+/// @param packet Packet to send
 void TcpSocket::sendPacket(TcpPacket *packet) {
     if (packet == nullptr)
         return;
 
     packet->send(socket_fd);
-}
-
-const addrinfo *TcpSocket::getSocketInfo() const {
-    return socket_addr.get();
 }

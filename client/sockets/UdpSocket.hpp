@@ -26,18 +26,14 @@ private:
     void resolveSocket();
 
 public:
-    enum Events { OK, READ_TIMEOUT, WRITE_TIMEOUT, TERMINATE };
-
     UdpSocket(std::string& ipaddr, std::string& port)
         : socket_fd(-1), port(port), ipaddr(ipaddr), server_addr(nullptr, &freeaddrinfo) {};
 
     ~UdpSocket();
 
     void setup();
-    int receivePacket(std::stringstream& packetStream);
-    int sendPacket(UdpPacket *packet);
-
-    const struct addrinfo* getSocketInfo() const;
+    void receivePacket(std::stringstream& packetStream);
+    void sendPacket(UdpPacket *packet);
 };
 
 #endif

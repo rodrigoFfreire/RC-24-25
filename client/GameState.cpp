@@ -25,16 +25,14 @@ void GameState::registerColorMap() {
     }
 }
 
-/// @brief Keeps track of a newly start game
-/// @param id  
-/// @param key 
-/// @param debug 
-void GameState::startGame(std::string& id, std::string* key, bool debug) {
+/// @brief Setup up a new game (client side), keeping track of the game's status and attempts
+/// @param id Player ID
+/// @param key Secret key (debug mode)
+void GameState::startGame(std::string& id, std::string* key) {
     plid = id;
     trial = 1;
     _isGame = true;
     _finished = false;
-    _debug = debug;
     
     _key.clear();
     guesses.clear();
@@ -42,13 +40,17 @@ void GameState::startGame(std::string& id, std::string* key, bool debug) {
 
     if (key != nullptr) {
         _key = *key;
+        _debug = true;  // Set debug mode if key was given
     }
 
     printState();
 }
 
+/// @brief Ends the game (client side), updating the status and explains the ending reason
+/// @param key Revealed secret key
+/// @param event Ending event (WON, LOST_MAXTRIALS, LOST_MAXTIME, QUIT)
 void GameState::endGame(std::string& key, Events event) {
-    _key = key;
+    _key = key;     // Stores the revealed secret key to display it later
 
     _finished = true;
     printState();
@@ -79,6 +81,7 @@ void GameState::endGame(std::string& key, Events event) {
     }
 }
 
+/// @brief Retrieves the associated PLID to the current active game
 std::string GameState::getPlid() {
     if (!_isGame && !_finished) {
         throw UncontextualizedException();
@@ -86,19 +89,28 @@ std::string GameState::getPlid() {
     return plid;
 }
 
+/// @brief Returns the next trial number if the game is active, else doesnt increment it 
 unsigned int GameState::newAttempt() {
     return (_isGame ? trial++ : trial);
 }
 
+/// @brief Returns the current trial number 
 unsigned int GameState::getTrial() {
     return trial;
 }
 
+/// @brief Saves an attempt to the game state, (key, n-whites, n-blacks)
+/// @param att Attempt key
+/// @param b N blacks (N on-position pegs)
+/// @param w N whites (N off-position pegs)
 void GameState::saveAttempt(std::string& att, unsigned int b, unsigned int w) {
     guesses.push_back(att);
     feedback.push_back({b, w});
 }
 
+/// @brief Saves data into a file and prints it
+/// @param fname Target file
+/// @param fdata Data to be saved
 void GameState::saveFile(std::string& fname, std::string& fdata) {
     try {
         std::ofstream file(fname);
@@ -113,6 +125,7 @@ void GameState::saveFile(std::string& fname, std::string& fdata) {
     }
 }
 
+/// @brief Prints the current game state of the client. Displays a table of all issued attempts
 void GameState::printState() {
     if (!_isGame) {
         return;

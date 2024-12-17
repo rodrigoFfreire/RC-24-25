@@ -1,5 +1,7 @@
 #include "udp_commands.hpp"
 
+/// @brief Parses the playerID from the stream and returns it
+/// @param command_stream User command stream
 std::string parsePlayerID(std::stringstream& command_stream) {
     int plid_num = -1;
 
@@ -16,6 +18,8 @@ std::string parsePlayerID(std::stringstream& command_stream) {
     return formatted_plid.str();
 }
 
+/// @brief Parses the play time from the stream and returns it
+/// @param command_stream User command stream 
 unsigned short parsePlayTime(std::stringstream& command_stream) {
     short play_time = -1;
 
@@ -30,6 +34,8 @@ unsigned short parsePlayTime(std::stringstream& command_stream) {
     return static_cast<unsigned short>(play_time);
 }
 
+/// @brief Parses an attempt key from the stream and returns it
+/// @param command_stream User command stream
 std::string parseKey(std::stringstream& command_stream) {
     std::string key(SECRET_KEY_LEN, '\0');
     std::string valid_colors = VALID_COLORS;
@@ -47,6 +53,10 @@ std::string parseKey(std::stringstream& command_stream) {
     return key;
 }
 
+/// @brief Start game handler. Sends the appropriate request and keeps track of a newly created game
+/// @param state Game state
+/// @param socket UdpSocket object
+/// @param command_stream User command stream
 void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     StartNewGamePacket request;
     ReplyStartGamePacket reply;
@@ -65,7 +75,7 @@ void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream&
         switch (reply.status) {
         case ReplyStartGamePacket::OK:
             std::cout << "Game started!" << std::endl;
-            state.startGame(request.playerID, nullptr, false);
+            state.startGame(request.playerID, nullptr);
             break;
         case ReplyStartGamePacket::NOK:
             throw PendingGameException();
@@ -81,6 +91,11 @@ void startNewGameHandler(GameState& state, UdpSocket& socket, std::stringstream&
     }
 }
 
+/// @brief Try Handler. Sends the appropriate request of sending an attempt to an ongoing game.
+/// This attempt is saved in the game state when the server confirms it
+/// @param state Game state
+/// @param socket UdpSocket object
+/// @param command_stream User command stream
 void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     TryPacket request;
     ReplyTryPacket reply;
@@ -138,6 +153,10 @@ void tryHandler(GameState& state, UdpSocket& socket, std::stringstream& command_
     }
 }
 
+/// @brief Quit Handler. Sends the appropriate request to quit an ongoing game. The secret is revealed
+/// @param state Game state
+/// @param socket UdpSocket object
+/// @param command_stream User command stream
 void quitHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     (void)command_stream;
     QuitPacket request;
@@ -173,6 +192,10 @@ void quitHandler(GameState& state, UdpSocket& socket, std::stringstream& command
     }
 }
 
+/// @brief Debug game handler. Sends the appropriate request to start a new debug game
+/// @param state Game state
+/// @param socket UdpSocket object
+/// @param command_stream User command stream
 void debugGameHandler(GameState& state, UdpSocket& socket, std::stringstream& command_stream) {
     DebugPacket request;
     ReplyDebugPacket reply;
@@ -190,7 +213,7 @@ void debugGameHandler(GameState& state, UdpSocket& socket, std::stringstream& co
         reply.decode(responseStream);
         switch (reply.status) {
         case ReplyDebugPacket::OK:
-            state.startGame(request.playerID, &request.key, true);
+            state.startGame(request.playerID, &request.key);
             break;
         case ReplyDebugPacket::NOK:
             throw PendingGameException();

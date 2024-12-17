@@ -1,5 +1,8 @@
 #include "tcp_commands.hpp"
 
+/// @brief Show trials handler. Sends the appropriate request and displays the last played or current game
+/// @param state Game state
+/// @param socket TcpSocket object
 void showTrialsHandler(GameState& state, TcpSocket& socket) {
     ShowTrialsPacket request;
     ReplyShowTrialsPacket reply;
@@ -30,6 +33,9 @@ void showTrialsHandler(GameState& state, TcpSocket& socket) {
     socket.end();
 }
 
+/// @brief Show scoreboard handler. Sends the appropriate request and displays the scoreboard
+/// @param state Game state
+/// @param socket TcpSocket object
 void showScoreboardHandler(GameState& state, TcpSocket& socket) {
     ShowScoreboardPacket request;
     ReplyShowScoreboardPacket reply;

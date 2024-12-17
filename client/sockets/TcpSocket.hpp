@@ -37,7 +37,6 @@ public:
     void end();
     void receivePacket(TcpPacket *packet);
     void sendPacket(TcpPacket *packet);
-    const addrinfo* getSocketInfo() const;
 };
 
 #endif

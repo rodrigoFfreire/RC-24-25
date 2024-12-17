@@ -1,5 +1,8 @@
 #include "Config.hpp"
 
+/// @brief Creates the client configuration object using argv
+/// @param argc 
+/// @param argv 
 Config::Config(int argc, char** argv) {
   int opt;
   fpath = std::string(argv[0]);
@@ -31,14 +34,19 @@ Config::Config(int argc, char** argv) {
   }
 }
 
+/// @brief Sets the target IP address
+/// @param ip_addr IP address (string format)
 void Config::setIP(const std::string& ip_addr) {
   ipaddr = ip_addr;
 }
 
+/// @brief Sets unicode mode (Renders colors with emojis)
 void Config::setUnicode() {
   unicode = true;
 }
 
+/// @brief Sets the target Port
+/// @param port_str Port (string format)
 void Config::setPort(const std::string& port_str) {
   try {
     long port_value = std::stol(port_str);
@@ -53,6 +61,8 @@ void Config::setPort(const std::string& port_str) {
   }
 }
 
+/// @brief Prints the player usage
+/// @param s Output stream
 void Config::printUsage(std::ostream& s) {
   s << "Usage: " << this->fpath << " [-n <GSIP>] [-p <GSport>] [-u] [-h]" << std::endl;
   s << "Options:" << std::endl;
