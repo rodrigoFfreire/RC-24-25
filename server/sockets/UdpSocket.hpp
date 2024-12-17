@@ -32,7 +32,7 @@ public:
     ~UdpSocket();
 
     void setup();
-    int receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr);
+    UdpSocket::Events receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr);
     std::string sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr);
 
     const struct addrinfo* getSocketInfo() const;

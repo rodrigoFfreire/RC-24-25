@@ -1,5 +1,8 @@
 #include "Config.hpp"
 
+/// @brief Creates the server configuration object using argv
+/// @param argc 
+/// @param argv 
 Config::Config(int argc, char** argv) {
   int opt;
   this->fpath = std::string(argv[0]);
@@ -27,10 +30,13 @@ Config::Config(int argc, char** argv) {
   }
 }
 
+/// @brief Sets verbose mode on
 void Config::setVerbose() {
   this->verbose = true;
 }
 
+/// @brief Sets configured port
+/// @param port_str Port in string format
 void Config::setPort(const std::string& port_str) {
   try {
     long port_value = std::stol(port_str);
@@ -45,6 +51,8 @@ void Config::setPort(const std::string& port_str) {
   }
 }
 
+/// @brief Prints the GS usage
+/// @param s Output stream
 void Config::printUsage(std::ostream& s) {
   s << "Usage: " << this->fpath << " [-p <GSport>] [-v] [-h]" << std::endl;
   s << "Options:" << std::endl;

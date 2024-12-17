@@ -3,6 +3,7 @@
 
 extern std::atomic<bool> terminateFlag;
 
+/// @brief Creates, binds and starts listening on the TCP socket
 void TcpSocket::createSocket() {
     if (socket_fd != -1) {
         throw SocketAlreadyCreatedError();
@@ -40,6 +41,7 @@ void TcpSocket::createSocket() {
     }
 }
 
+/// @brief Closes the TCP socket
 TcpSocket::~TcpSocket() {
     if (socket_fd != -1) {
         close(socket_fd);
@@ -47,6 +49,7 @@ TcpSocket::~TcpSocket() {
     }
 }
 
+/// @brief Resolves an usable address for the socket
 void TcpSocket::resolveSocket() {
     int gai_err;
     struct addrinfo hints;
@@ -65,12 +68,17 @@ void TcpSocket::resolveSocket() {
     socket_addr.reset(raw_addrinfo);
 }
 
+/// @brief Sets up the socket (open, resolve, bind, listen)
 void TcpSocket::setup() {
     resolveSocket();
     createSocket();
 }
 
-int TcpSocket::acceptConnection(int& conn_fd, struct sockaddr_in& client_addr) {
+/// @brief Waits for a TCP connection and creates a new file descriptor that connection
+/// @param conn_fd Stores the established connection descriptor
+/// @param client_addr Client address info
+/// @return TCP Socket Event (OK, TIMEOUT, TERMINATE)
+TcpSocket::Events TcpSocket::acceptConnection(int& conn_fd, struct sockaddr_in& client_addr) {
     socklen_t client_addrlen = sizeof(client_addr);
 
     conn_fd = accept(socket_fd,
@@ -87,6 +95,8 @@ int TcpSocket::acceptConnection(int& conn_fd, struct sockaddr_in& client_addr) {
     return OK;
 }
 
+/// @brief Setup an individual TCP connection socket
+/// @param conn_fd Connection descriptor
 void TcpSocket::setupConnection(const int conn_fd) {
     // Set receive and send timeouts for each connection
     struct timeval tv;
@@ -102,6 +112,7 @@ void TcpSocket::setupConnection(const int conn_fd) {
     }
 }
 
+/// @brief Returns the socket address info
 const addrinfo *TcpSocket::getSocketInfo() const {
     return socket_addr.get();
 }

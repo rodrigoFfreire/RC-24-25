@@ -3,6 +3,7 @@
 
 extern std::atomic<bool> terminateFlag;
 
+/// @brief Creates and binds the UDP socket
 void UdpSocket::createSocket() {
     if (socket_fd != -1) {
         throw SocketAlreadyCreatedError();
@@ -35,6 +36,7 @@ void UdpSocket::createSocket() {
     }
 }
 
+/// @brief Closes the socket
 UdpSocket::~UdpSocket() {
     if (socket_fd != -1) {
         close(socket_fd);
@@ -42,6 +44,7 @@ UdpSocket::~UdpSocket() {
     }
 }
 
+/// @brief Resolves an usable address for the socket
 void UdpSocket::resolveSocket() {
     int gai_err;
     struct addrinfo hints;
@@ -60,12 +63,17 @@ void UdpSocket::resolveSocket() {
     socket_addr.reset(raw_addrinfo);
 }
 
+/// @brief Sets up the socket (open, resolve, bind)
 void UdpSocket::setup() {
     resolveSocket();
     createSocket();
 }
 
-int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr) {
+/// @brief Receives a UDP packet
+/// @param packetStream Stores the received packet in this stream
+/// @param client_addr Client address info
+/// @return UdpSocket Event (OK, TIMEOUT, TERMINATE)
+UdpSocket::Events UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in& client_addr) {
     char buffer[SOCK_BUFFER_SIZE];
     ssize_t received_bytes;
     socklen_t client_addrlen = sizeof(client_addr);
@@ -89,6 +97,10 @@ int UdpSocket::receivePacket(std::stringstream& packetStream, struct sockaddr_in
     return OK;
 }
 
+/// @brief Sends a UDP packet
+/// @param replyPacket The pointer to the packet to be sent
+/// @param client_addr Client address info
+/// @return The sent serialiazed packet
 std::string UdpSocket::sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struct sockaddr_in& client_addr) {
     socklen_t client_addrlen = sizeof(client_addr);
     std::string packetStr = replyPacket->encode();
@@ -105,6 +117,7 @@ std::string UdpSocket::sendPacket(std::unique_ptr<UdpPacket>& replyPacket, struc
     return packetStr;
 }
 
+/// @brief Returns the socket address info
 const addrinfo *UdpSocket::getSocketInfo() const {
     return socket_addr.get();
 }
