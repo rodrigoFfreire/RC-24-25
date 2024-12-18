@@ -7,7 +7,7 @@ std::string UdpParser::parseFixedString(ulong size) {
   char* data = buffer.data();
 
   packetStream.read(data, size);
-  if (!packetStream || packetStream.gcount() != size) {
+  if (!packetStream || packetStream.gcount() != static_cast<long>(size)) {
     throw InvalidPacketException();
   }
 
